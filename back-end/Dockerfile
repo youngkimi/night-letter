@@ -1,4 +1,4 @@
-FROM openjdk:17-alpine
+FROM eclipse-temurin:17-jdk-alpine
 
 ARG JAR_FILE=/back-end/build/libs/NightLetter-1.0.1.jar
 
