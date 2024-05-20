@@ -14,8 +14,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (accessToken && nextUrl.pathname == "/login") {
-    return NextResponse.redirect(new URL("/"));
+  if (accessToken && nextUrl.pathname === "/login") {
+    return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_URL));
   }
 
   return NextResponse.next();
