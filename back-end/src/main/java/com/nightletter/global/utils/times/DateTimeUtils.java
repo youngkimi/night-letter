@@ -16,6 +16,6 @@ public class DateTimeUtils {
 
 	public static Instant tokenExpireTime() {
 		System.out.println("TOKEN EXPIRE TIME : " + LocalDateTime.now());
-		return LocalDateTime.now().plusMinutes(60).toInstant(ZoneOffset.of("+09:00"));
+		return LocalDateTime.now().plusMinutes(120).toInstant(ZoneOffset.of("+09:00"));
 	}
 }

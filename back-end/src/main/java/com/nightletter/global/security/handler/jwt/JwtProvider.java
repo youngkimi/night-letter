@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -25,6 +26,9 @@ public class JwtProvider {
 	public String create(String memberId) {
 
 		Date expiredDate = Date.from(DateTimeUtils.tokenExpireTime());
+
+		System.out.println("CREATE EXPIRED TIME: " + expiredDate);
+
 		Key key = Keys.hmacShaKeyFor(secretKey.getBytes((StandardCharsets.UTF_8)));
 
 		return Jwts.builder()
