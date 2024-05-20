@@ -14,7 +14,7 @@ spring:
           kakao:
             client-id: ${KAKAO_LOGIN_RESTAPI_KEY}
             client-secret: ${KAKAO_LOGIN_CLIENT_SECRET}
-            redirect-uri: ${KAKAO_LOGIN_REDIRECT_URI}
+            redirect-uri: ${KAKAO_LOCAL_TOKEN_RESPONSE_URI}
             scope:
               - profile_nickname
               - profile_image
