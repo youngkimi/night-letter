@@ -181,6 +181,7 @@ public class DiaryServiceImpl implements DiaryService {
 
 		FutureTarotResponse response = diaryRepository.findFutureTarot(event.getDiaryId())
 			.orElseThrow(() ->
+
 				new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "Diary Not Found"));
 
 		// 3. GPT 코멘트 요청 및 응답 수신 후 실시간 알림.
