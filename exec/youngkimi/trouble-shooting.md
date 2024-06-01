@@ -59,8 +59,28 @@ memberRepository 에서 한번의 쿼리 더 발생.
 
 Diary 작성 시의 문제.
 
+추천 다이어리 저장.
+
 무수한 Select와 무수한 Insert
 
-```
+### 개선 방향
 
-```
+Prometheus / Grafana / Ngrinder 기반 테스트
+
+성능 조회 후 개선
+
+1. 추천 다이어리 save Batch
+
+- ![save_recommend](./asset/save_recommend.PNG)
+
+- JPA saveall, batch, JDBC batch...
+
+2. Security Context Member Annotation.
+
+3. 다이어리 조회 SQL 압축.
+
+- ![select_diary](./asset/select_diaries.PNG)
+
+4. 닉네임 업데이트 멀티 컬럼 -> 단일 컬럼
+
+- ![select_diary](./asset/update_nickname.PNG)
