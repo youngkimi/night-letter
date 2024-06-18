@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 
 MYSQL_USERNAME = os.getenv("MYSQL_USERNAME")
 MYSQL_PASSWORD = os.getenv("MYSQL_PASSWORD")
-MYSQL_HOST = os.getenv("MYSQL_HOST")
+MYSQL_HOST = os.getenv("MYSQL_HOST_RECSYS")
 MYSQL_DATABASE = os.getenv("MYSQL_DATABASE")
 
 DATABASE = 'mysql://%s:%s@%s/%s?charset=utf8' % (
