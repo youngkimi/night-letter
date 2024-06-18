@@ -11,7 +11,7 @@ public class WebClientConfig {
 	@Bean
 	public WebClient webClient() {
 		return WebClient.builder()
-			.baseUrl("https://dev.letter-for.me/rec/v1")
+			.baseUrl("https://letter-for.me/rec/v1")
 			.exchangeStrategies(ExchangeStrategies.builder()
 				.codecs(configurer -> configurer
 					.defaultCodecs()
