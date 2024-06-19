@@ -129,13 +129,13 @@ public class DiaryServiceImpl implements DiaryService {
 
 		// 메세지 전송.
 		// 생성된 다이어리 아이디와, 임베딩 벡터 값을 전달.
-		kafkaTemplate.send("create-diary-dev", event);
+		kafkaTemplate.send("create-diary", event);
 
 		return TarotResponse.of(nowTarot, nowTarot.getDir());
 	}
 
 	@Transactional
-	@KafkaListener(topics = "create-diary-dev", groupId = "recommend_diary-1")
+	@KafkaListener(topics = "create-diary", groupId = "recommend_diary")
 	public void sendRecommendedDiaries(DiaryCreateEvent event) {
 
 		System.out.println("RECEIVE_REC_EVENT: event: " + event);
@@ -166,7 +166,7 @@ public class DiaryServiceImpl implements DiaryService {
 	}
 
 	@Transactional
-	@KafkaListener(topics = "create-diary-dev", groupId = "gpt_diary-1")
+	@KafkaListener(topics = "create-diary", groupId = "gpt_diary")
 	public void sendGPTComment(DiaryCreateEvent event) {
 
 		System.out.println("RECEIVE_GPT_EVENT: event: " + event);
