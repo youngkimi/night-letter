@@ -38,6 +38,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 		try {
+			// check baseUrl for Prometheus monitoring
+			if (request.getRequestURI().startsWith("/system")) {
+				filterChain.doFilter(request, response);
+				return;
+			}
+
 			// 토큰 확인.
 			String token = parseBearerToken(request);
 
