@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_URL}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+        dialect: org.hibernate.dialect.MySQLDialect
+        transaction:
+          jta:
+            platform=org:
+              hibernate:
+                service:
+                  jta:
+                    platform:
+                      internal:
+                        JBossStandAloneJtaPlatform:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
