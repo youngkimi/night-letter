@@ -38,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 		try {
+			log.info("REQUESTED URL : " + request.getRequestURI());
 			// check baseUrl for Prometheus monitoring
 			if (request.getRequestURI().startsWith("/system")) {
 				filterChain.doFilter(request, response);
