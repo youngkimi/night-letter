@@ -3,6 +3,7 @@ package com.nightletter.global.security.handler.jwt;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -11,7 +12,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.nightletter.domain.member.repository.MemberRepository;
+import com.nightletter.global.exception.CommonErrorCode;
+import com.nightletter.global.exception.ValidationException;
 import com.nightletter.global.security.token.AccessToken;
 
 import jakarta.servlet.FilterChain;
@@ -80,6 +82,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			if (cookie.getName().equals("access-token")) {
 				accessToken = cookie.getValue();
 			}
+		}
+
+		if (accessToken == null && request.getRequestURI().startsWith("/system")) {
+			String authToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+			if (authToken != null && authToken.startsWith("Bearer ")) {
+				accessToken = authToken.substring("Bearer ".length());
+			}
+		}
+
+		if (accessToken == null) {
+			throw new ValidationException(CommonErrorCode.INVALID_AUTHORIZATION, "NOT A VALID TOKEN");
 		}
 
 		return accessToken;
