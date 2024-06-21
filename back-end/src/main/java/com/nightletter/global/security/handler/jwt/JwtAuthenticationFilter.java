@@ -1,6 +1,7 @@
 package com.nightletter.global.security.handler.jwt;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,7 +11,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.repository.MemberRepository;
 import com.nightletter.global.security.token.AccessToken;
 
@@ -51,16 +51,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 			AccessToken accessToken = jwtProvider.validate(token);
 
-			if (accessToken.getMemberId() == null) {
-				filterChain.doFilter(request, response);
-				return;
-			}
-
-			Member member = memberRepository.findByMemberId(accessToken.getMemberId());
+			// if (accessToken.getMemberId() == null) {
+			// 	filterChain.doFilter(request, response);
+			// 	return;
+			// }
 
 			SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 			AbstractAuthenticationToken authenticationToken =
-				new UsernamePasswordAuthenticationToken(accessToken.getMemberId(), null, accessToken.getRoles());
+				new UsernamePasswordAuthenticationToken(accessToken.getMemberId(), null, List.of(accessToken.getRole()));
 
 			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

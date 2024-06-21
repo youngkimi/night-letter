@@ -46,9 +46,14 @@ public class Member extends BaseTimeEntity {
 	private String profileImgUrl;
 
 	@Enumerated(EnumType.STRING)
+	@Column(name = "provider", length = 8)
 	private Provider provider;
 
 	private LocalDateTime deletedAt;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "role", length = 32)
+	Role role;
 
 	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
 	Set<Scrap> scraps = new HashSet<>();

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.nightletter.domain.member.entity.Member;
+import com.nightletter.domain.member.entity.Role;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Integer>, MemberCustomRepository {
@@ -11,5 +12,6 @@ public interface MemberRepository extends JpaRepository<Member, Integer>, Member
 	Member findMemberByOAuth2Id(String OAuth2Id);
 
 	Member findByMemberId(Integer currentMemberId);
+
 }
 

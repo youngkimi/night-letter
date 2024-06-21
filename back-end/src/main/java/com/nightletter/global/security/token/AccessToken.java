@@ -1,7 +1,5 @@
 package com.nightletter.global.security.token;
 
-import java.util.List;
-
 import org.springframework.security.core.GrantedAuthority;
 
 import lombok.AllArgsConstructor;
@@ -13,5 +11,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AccessToken {
 	Integer memberId;
-	List<GrantedAuthority> roles;
+	GrantedAuthority role;
 }

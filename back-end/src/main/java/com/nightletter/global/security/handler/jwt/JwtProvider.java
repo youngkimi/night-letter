@@ -3,15 +3,16 @@ package com.nightletter.global.security.handler.jwt;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import com.nightletter.domain.member.entity.Member;
+import com.nightletter.domain.member.repository.MemberRepository;
+import com.nightletter.global.exception.CommonErrorCode;
+import com.nightletter.global.exception.ResourceNotFoundException;
 import com.nightletter.global.security.token.AccessToken;
 import com.nightletter.global.utils.times.DateTimeUtils;
 
@@ -19,9 +20,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @Component
 public class JwtProvider {
+
+	private final MemberRepository memberRepository;
+
 	@Value("${jwt.secret-key}")
 	private String secretKey;
 
@@ -33,7 +39,11 @@ public class JwtProvider {
 
 		Key key = Keys.hmacShaKeyFor(secretKey.getBytes((StandardCharsets.UTF_8)));
 
-		Map<String, Object> roles = Map.of("role", List.of("ROLE_MEMBER"));
+		Member member = memberRepository.findById(Integer.parseInt(memberId))
+			.orElseThrow(() -> new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "MEMBER NOT FOUND"));
+
+		// Map<String, Object> roles = Map.of("role", List.of("ROLE_MEMBER"));
+		Map<String, Object> roles = Map.of("role", member.getRole());
 
 		return Jwts.builder()
 			.signWith(key, SignatureAlgorithm.HS256)
@@ -70,6 +80,8 @@ public class JwtProvider {
 	public AccessToken validate(String jwt) {
 
 		String subject = null;
+		String role = null;
+
 		Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
 
 		try {
@@ -80,25 +92,28 @@ public class JwtProvider {
 				.getBody();
 
 			subject = claims.getSubject();
-			Object parsedRoles = claims.get("role");
 
-			List<GrantedAuthority> convertedRoles = null;
+			role = claims.get("role").toString();
 
-			if (parsedRoles instanceof List<?> roles) {
-
-				if (! roles.stream()
-					.allMatch(role -> role instanceof String)) {
-					return null;
-				}
-
-				convertedRoles = roles.stream()
-					.map(role -> new SimpleGrantedAuthority(role.toString()))
-					.collect(Collectors.toList());
-			}
+			// Object parsedRoles = claims.get("role");
+			//
+			// List<GrantedAuthority> convertedRoles = null;
+			//
+			// if (parsedRoles instanceof List<?> roles) {
+			//
+			// 	if (! roles.stream()
+			// 		.allMatch(role -> role instanceof String)) {
+			// 		return null;
+			// 	}
+			//
+			// 	convertedRoles = roles.stream()
+			// 		.map(role -> new SimpleGrantedAuthority(role.toString()))
+			// 		.collect(Collectors.toList());
+			// }
 
 			return AccessToken.builder()
 				.memberId(Integer.parseInt(subject))
-				.roles(convertedRoles)
+				.role(new SimpleGrantedAuthority(role))
 				.build();
 
 		} catch (Exception e) {
