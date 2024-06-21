@@ -2,11 +2,6 @@ package com.nightletter.global.security.handler.jwt;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
