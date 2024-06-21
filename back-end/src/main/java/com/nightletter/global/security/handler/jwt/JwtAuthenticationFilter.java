@@ -1,13 +1,9 @@
 package com.nightletter.global.security.handler.jwt;
 
 import java.io.IOException;
-import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -16,8 +12,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.repository.MemberRepository;
+import com.nightletter.global.security.token.AccessToken;
 
-import io.micrometer.common.lang.NonNullApi;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -53,20 +49,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				return;
 			}
 
-			String memberId = jwtProvider.validate(token);
+			AccessToken accessToken = jwtProvider.validate(token);
 
-			if (memberId == null) {
+			if (accessToken.getMemberId() == null) {
 				filterChain.doFilter(request, response);
 				return;
 			}
 
-			Member member = memberRepository.findByMemberId(Integer.parseInt(memberId));
-
-			List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_MEMBER"));
+			Member member = memberRepository.findByMemberId(accessToken.getMemberId());
 
 			SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 			AbstractAuthenticationToken authenticationToken =
-				new UsernamePasswordAuthenticationToken(memberId, null, authorities);
+				new UsernamePasswordAuthenticationToken(accessToken.getMemberId(), null, accessToken.getRoles());
 
 			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
@@ -95,4 +89,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		return accessToken;
 	}
+
 }
