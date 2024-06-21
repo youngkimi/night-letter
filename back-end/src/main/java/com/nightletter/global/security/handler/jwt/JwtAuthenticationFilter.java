@@ -57,8 +57,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			// }
 
 			SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+
+			// TODO Authentication memberId Integer, Use Annotation
+
 			AbstractAuthenticationToken authenticationToken =
-				new UsernamePasswordAuthenticationToken(accessToken.getMemberId(), null, List.of(accessToken.getRole()));
+				new UsernamePasswordAuthenticationToken(accessToken.getMemberId().toString(), null, List.of(accessToken.getRole()));
 
 			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
