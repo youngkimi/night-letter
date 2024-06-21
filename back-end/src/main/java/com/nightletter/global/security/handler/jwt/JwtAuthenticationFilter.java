@@ -27,19 +27,18 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-	private final MemberRepository memberRepository;
 	private final JwtProvider jwtProvider;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 		try {
-			log.info("REQUESTED URL : " + request.getRequestURI());
+
 			// check baseUrl for Prometheus monitoring
-			if (request.getRequestURI().startsWith("/system")) {
-				filterChain.doFilter(request, response);
-				return;
-			}
+			// if (request.getRequestURI().startsWith("/system")) {
+			// 	filterChain.doFilter(request, response);
+			// 	return;
+			// }
 
 			// 토큰 확인.
 			String token = parseBearerToken(request);
@@ -50,11 +49,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 
 			AccessToken accessToken = jwtProvider.validate(token);
-
-			// if (accessToken.getMemberId() == null) {
-			// 	filterChain.doFilter(request, response);
-			// 	return;
-			// }
 
 			SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 

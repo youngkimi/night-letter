@@ -53,7 +53,9 @@ public class WebSecurityConfig {
 			)
 			.authorizeHttpRequests(request -> request
 				// TODO 수정 필요.
-				.requestMatchers("/", "/api/v2/auth/**", "/oauth2/**").permitAll()
+				.requestMatchers("/api/v2/auth/**", "/oauth2/**").permitAll()
+				.requestMatchers("/api/v2/**").hasAnyRole("MEMBER", "ADMIN")
+				.requestMatchers("/system/**").hasRole("ADMIN")
 				.anyRequest().authenticated()
 			)
 			.oauth2Login(oauth2 -> oauth2
