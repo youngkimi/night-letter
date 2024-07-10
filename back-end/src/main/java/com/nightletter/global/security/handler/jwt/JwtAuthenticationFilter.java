@@ -86,7 +86,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 		}
 
-		if (accessToken == null && request.getRequestURI().startsWith("/system")) {
+		if (accessToken == null) {
 			String authToken = request.getHeader(HttpHeaders.AUTHORIZATION);
 
 			if (authToken != null && authToken.startsWith("Bearer ")) {
