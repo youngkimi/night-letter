@@ -174,9 +174,12 @@ public class DiaryCustomRepositoryImpl implements DiaryCustomRepository {
 	public List<Diary> findDiariesByMember(Member member, DiaryListRequest request) {
 		return queryFactory.select(diary)
 			.from(diary)
+			.leftJoin(diary.diaryTarots, diaryTarot).fetchJoin()
+			.leftJoin(diaryTarot.tarot, tarot).fetchJoin()
 			.where(diary.writer.eq(member)
 				.and(diary.date.between(request.getSttDate(), request.getEndDate())))
 			.orderBy(diary.date.asc())
+			.distinct()
 			.fetch();
 	}
 }
