@@ -66,7 +66,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		} catch (Exception e) {
 			log.info("ERROR OCCURED IN PARSING TOKEN");
-			e.printStackTrace();
 		}
 
 		filterChain.doFilter(request, response);

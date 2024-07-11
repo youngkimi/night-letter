@@ -25,13 +25,15 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	@Value("${spring.security.provider.response-uri.kakao}")
 	private String tokenResponseUri;
 
+	@Value("${JWT.access.expiration}")
+	private static Long accessTokenExpirationTime;
+
 	private final JwtProvider jwtProvider;
 
 	private static ResponseCookie accessCookie(String token) {
 		return ResponseCookie.from("access-token", token)
-			.maxAge(Duration.of(60, ChronoUnit.DAYS))
+			.maxAge(Duration.of(accessTokenExpirationTime, ChronoUnit.SECONDS))
 			.httpOnly(true)
-			// TODO Oauth2 성공 시 옵션. 개발용으로 변경.
 			.path("/")
 			.sameSite("None")
 			.secure(true)

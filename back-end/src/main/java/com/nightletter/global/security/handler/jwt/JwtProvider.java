@@ -35,8 +35,6 @@ public class JwtProvider {
 
 		Date expiredDate = Date.from(DateTimeUtils.tokenExpireTime());
 
-		System.out.println("CREATE EXPIRED TIME: " + expiredDate);
-
 		Key key = Keys.hmacShaKeyFor(secretKey.getBytes((StandardCharsets.UTF_8)));
 
 		Member member = memberRepository.findById(Integer.parseInt(memberId))

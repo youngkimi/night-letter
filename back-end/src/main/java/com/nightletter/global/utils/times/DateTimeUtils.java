@@ -8,14 +8,18 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class DateTimeUtils {
+
+	@Value("${JWT.access.expiration}")
+	private static Long accessTokenExpirationTime;
 
 	public static LocalDateTime nowFromZone() {
 		return ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
 	}
 
 	public static Instant tokenExpireTime() {
-		System.out.println("TOKEN EXPIRE TIME : " + LocalDateTime.now());
-		return LocalDateTime.now().plusMinutes(120).toInstant(ZoneOffset.of("+09:00"));
+		return LocalDateTime.now().plusSeconds(accessTokenExpirationTime).toInstant(ZoneOffset.of("+09:00"));
 	}
 }
