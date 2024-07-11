@@ -1,11 +1,15 @@
 package com.nightletter.domain.member.entity;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.nightletter.domain.diary.entity.Scrap;
 import com.nightletter.global.common.BaseTimeEntity;
@@ -31,7 +35,7 @@ import lombok.NoArgsConstructor;
 @SQLDelete(sql = "UPDATE Member SET deleted_at = now() WHERE member_id = ?")
 @SQLRestriction("deleted_at IS NULL")
 @Entity
-public class Member extends BaseTimeEntity {
+public class Member extends BaseTimeEntity implements OAuth2User {
 	@Id
 	@Column(name = "member_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,4 +71,23 @@ public class Member extends BaseTimeEntity {
 		this.nickname = nickname;
 	}
 
+	@Override
+	public <A> A getAttribute(String name) {
+		return OAuth2User.super.getAttribute(name);
+	}
+
+	@Override
+	public Map<String, Object> getAttributes() {
+		return null;
+	}
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return null;
+	}
+
+	@Override
+	public String getName() {
+		return null;
+	}
 }

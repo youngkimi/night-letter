@@ -25,8 +25,6 @@ public class JpaAuditorConfig implements AuditorAware<Integer> {
 			return Optional.empty();
 		}
 
-		System.out.println(authentication.getPrincipal());
-
 		return Optional.of(Integer.parseInt((String) authentication.getPrincipal()));
 	}
 }

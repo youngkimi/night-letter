@@ -1,7 +1,9 @@
 package com.nightletter.global.security.handler.jwt;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -12,7 +14,10 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.nightletter.domain.member.entity.Member;
+import com.nightletter.domain.member.repository.MemberRepository;
 import com.nightletter.global.exception.CommonErrorCode;
+import com.nightletter.global.exception.ResourceNotFoundException;
 import com.nightletter.global.exception.ValidationException;
 import com.nightletter.global.security.token.AccessToken;
 
@@ -30,74 +35,59 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtProvider jwtProvider;
+	private final MemberRepository memberRepository;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
-		try {
 
-			// check baseUrl for Prometheus monitoring
-			// if (request.getRequestURI().startsWith("/system")) {
-			// 	filterChain.doFilter(request, response);
-			// 	return;
-			// }
-
-			// 토큰 확인.
-			String token = parseBearerToken(request);
-
-			if (token == null) {
-				filterChain.doFilter(request, response);
-				return;
-			}
-
-			AccessToken accessToken = jwtProvider.validate(token);
-
-			SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-
-			// TODO Authentication memberId Integer, Use Annotation
-
-			AbstractAuthenticationToken authenticationToken =
-				new UsernamePasswordAuthenticationToken(accessToken.getMemberId().toString(), null, List.of(accessToken.getRole()));
-
-			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-			securityContext.setAuthentication(authenticationToken);
-			SecurityContextHolder.setContext(securityContext);
-
-		} catch (Exception e) {
-			log.info("ERROR OCCURED IN PARSING TOKEN");
-		}
+		Optional.of(parseBearerToken(request))
+			.map(jwtProvider::validate)
+			.ifPresentOrElse(token -> findMemberAndSetSecurityContext(token, request),
+				() -> log.info("No bearer token found")
+			);
 
 		filterChain.doFilter(request, response);
+
+	}
+
+	private void findMemberAndSetSecurityContext(AccessToken accessToken ,HttpServletRequest request) {
+
+		memberRepository.findById(accessToken.getMemberId())
+			.ifPresentOrElse(
+				member -> setSecurityContext(member, accessToken, request),
+				() -> {
+					throw new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "MEMBER IS NOT FOUND");
+				}
+			);
+	}
+
+	private void setSecurityContext(Member member, AccessToken accessToken ,HttpServletRequest request) {
+		SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+		AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member, null, List.of(accessToken.getRole()));
+		authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+		securityContext.setAuthentication(authenticationToken);
+		SecurityContextHolder.setContext(securityContext);
 	}
 
 	private String parseBearerToken(HttpServletRequest request) {
+		return extractTokenFromCookie(request)
+				.orElse(extractTokenFromHeader(request)
+					.orElseThrow(() -> new ValidationException(CommonErrorCode.INVALID_AUTHORIZATION, "NOT A VALID TOKEN")));
+	}
 
-		Cookie[] cookies = request.getCookies();
+	private static Optional<String> extractTokenFromCookie(HttpServletRequest request) {
+		return Optional.ofNullable(request.getCookies())
+			.flatMap(cookies -> Arrays.stream(cookies)
+				.filter(cookie -> "access-token".equals(cookie.getName()))
+				.findFirst()
+				.map(Cookie::getValue));
+	}
 
-	   	String accessToken = null;
-
-	    if (cookies != null) {
-			for (Cookie cookie : cookies) {
-				if (cookie.getName().equals("access-token")) {
-					accessToken = cookie.getValue();
-				}
-			}
-		}
-
-		if (accessToken == null) {
-			String authToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-
-			if (authToken != null && authToken.startsWith("Bearer ")) {
-				accessToken = authToken.substring("Bearer ".length());
-			}
-		}
-
-		if (accessToken == null) {
-			throw new ValidationException(CommonErrorCode.INVALID_AUTHORIZATION, "NOT A VALID TOKEN");
-		}
-
-		return accessToken;
+	private static Optional<String> extractTokenFromHeader(HttpServletRequest request) {
+		return Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION))
+			.filter(authHeader -> authHeader.startsWith("Bearer "))
+			.map(authHeader -> authHeader.substring("Bearer ".length()));
 	}
 
 }

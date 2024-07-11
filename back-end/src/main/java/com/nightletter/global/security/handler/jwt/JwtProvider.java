@@ -2,6 +2,7 @@ package com.nightletter.global.security.handler.jwt;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.SignatureException;
 import java.util.Date;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.repository.MemberRepository;
 import com.nightletter.global.exception.CommonErrorCode;
 import com.nightletter.global.exception.ResourceNotFoundException;
+import com.nightletter.global.exception.ValidationException;
 import com.nightletter.global.security.token.AccessToken;
 import com.nightletter.global.utils.times.DateTimeUtils;
 
@@ -115,8 +117,7 @@ public class JwtProvider {
 				.build();
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
+			throw new ValidationException(CommonErrorCode.INVALID_AUTHORIZATION, "Access Token is invalid");
 		}
 
 	}

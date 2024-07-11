@@ -21,21 +21,21 @@ import com.nightletter.global.common.ResponseDto;
 
 public interface DiaryService {
 
-	TarotResponse createDiary(DiaryCreateRequest diaryCreateRequest);
+	TarotResponse createDiary(DiaryCreateRequest diaryCreateRequest, Member member);
 
 	Optional<DiaryResponse> updateDiaryDisclosure(DiaryDisclosureRequest request);
 
-	List<DiaryResponse> findDiaries(DiaryListRequest diaryListRequest);
+	List<DiaryResponse> findDiaries(DiaryListRequest diaryListRequest, Member member);
 
 	Optional<DiaryResponse> findDiary(Long diaryId);
-	TodayDiaryResponse isTodayDiaryWritten();
+	TodayDiaryResponse isTodayDiaryWritten(Member member);
 
 	Optional<ResponseDto> deleteDiary(Long diaryId);
 
-	Optional<String> createDiaryShareUrl(Long diaryId);
-	Page<DiaryScrapResponse> findScrappedRecommends(Integer pageNo);
-	void scrapDiary(Long diaryId);
-	void unscrapDiary(Long diaryId);
-	List<DiaryRecResponse> findTodayRecommendedDiaries();
+	Optional<String> createDiaryShareUrl(Long diaryId, Member member);
+	Page<DiaryScrapResponse> findScrappedRecommends(Integer pageNo, Member member);
+	void scrapDiary(Long diaryId, Member member);
+	void unscrapDiary(Long diaryId, Member member);
+	List<DiaryRecResponse> findTodayRecommendedDiaries(Member member);
 
 }

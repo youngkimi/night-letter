@@ -26,7 +26,9 @@ import com.nightletter.domain.diary.dto.response.GPTResponse;
 import com.nightletter.domain.diary.dto.response.TodayDiaryResponse;
 import com.nightletter.domain.diary.service.DiaryService;
 import com.nightletter.domain.diary.service.GptServiceImpl;
+import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.tarot.dto.TarotResponse;
+import com.nightletter.global.common.CurrentMember;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +43,8 @@ public class DiaryController {
 	private final GptServiceImpl gptService;
 
 	@PostMapping("")
-	public ResponseEntity<TarotResponse> addDiary(@RequestBody DiaryCreateRequest diaryCreateRequest) {
-		TarotResponse tarot = diaryService.createDiary(diaryCreateRequest);
+	public ResponseEntity<TarotResponse> addDiary(@CurrentMember Member member, @RequestBody DiaryCreateRequest diaryCreateRequest) {
+		TarotResponse tarot = diaryService.createDiary(diaryCreateRequest, member);
 		return ResponseEntity.status(HttpStatus.CREATED).body(tarot);
 	}
 
@@ -57,9 +59,9 @@ public class DiaryController {
 	}
 
 	@GetMapping("/today")
-	public ResponseEntity<?> isTodayDiaryWritten() {
+	public ResponseEntity<?> isTodayDiaryWritten(@CurrentMember Member member) {
 
-		TodayDiaryResponse response = diaryService.isTodayDiaryWritten();
+		TodayDiaryResponse response = diaryService.isTodayDiaryWritten(member);
 
 		return ResponseEntity.ok(
 			response
@@ -67,8 +69,8 @@ public class DiaryController {
 	}
 
 	@PostMapping("/self")
-	public ResponseEntity<?> findDiaries(@RequestBody DiaryListRequest diaryListRequest) {
-		List<DiaryResponse> response = diaryService.findDiaries(diaryListRequest);
+	public ResponseEntity<?> findDiaries(@CurrentMember Member member, @RequestBody DiaryListRequest diaryListRequest) {
+		List<DiaryResponse> response = diaryService.findDiaries(diaryListRequest, member);
 
 		return ResponseEntity.ok(response);
 	}
@@ -102,27 +104,26 @@ public class DiaryController {
 	}
 
 	@GetMapping("/scrap")
-	public ResponseEntity<?> findScraps(@RequestParam Integer page) {
-		Page<DiaryScrapResponse> scraps = diaryService.findScrappedRecommends(page);
+	public ResponseEntity<?> findScraps(@CurrentMember Member member, @RequestParam Integer page) {
+		Page<DiaryScrapResponse> scraps = diaryService.findScrappedRecommends(page, member);
 		return ResponseEntity.status(HttpStatus.OK).body(scraps);
 	}
 
 	@PostMapping("/scrap")
-	public ResponseEntity<?> scrapDiary(@RequestParam Long diaryId) {
-		diaryService.scrapDiary(diaryId);
+	public ResponseEntity<?> scrapDiary(@CurrentMember Member member, @RequestParam Long diaryId) {
+		diaryService.scrapDiary(diaryId, member);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
 	@DeleteMapping("/scrap")
-	public ResponseEntity<?> unscrapDiary(@RequestParam Long diaryId) {
-		diaryService.unscrapDiary(diaryId);
+	public ResponseEntity<?> unscrapDiary(@CurrentMember Member member, @RequestParam Long diaryId) {
+		diaryService.unscrapDiary(diaryId, member);
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
 	@GetMapping("/recommend")
-	public ResponseEntity<?> findTodayRecommendedDiaries() {
-
-		return ResponseEntity.ok(diaryService.findTodayRecommendedDiaries());
+	public ResponseEntity<?> findTodayRecommendedDiaries(@CurrentMember Member member) {
+		return ResponseEntity.ok(diaryService.findTodayRecommendedDiaries(member));
 	}
 
 }

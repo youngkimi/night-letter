@@ -69,7 +69,6 @@ public class WebSecurityConfig {
 			)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-
 		return httpSecurity.build();
 	}
 
@@ -108,9 +107,7 @@ public class WebSecurityConfig {
 		public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException, ServletException {
 			response.setContentType("application/json");
-			// 권한 없음.
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-			// {"code": "NP", "message": "No Permission."}
 			response.getWriter().write("{\"code\": \"NP\", \"message\": \"No Permission.\"}");
 		}
 	}

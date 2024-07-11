@@ -13,7 +13,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nightletter.domain.member.entity.CustomOAuth2User;
 import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.entity.Provider;
 import com.nightletter.domain.member.repository.MemberRepository;
@@ -38,14 +37,6 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 
 		String oauthClientName = userRequest.getClientRegistration().getClientName();
 
-		try {
-			System.out.println(
-				"======================================OAUTH2 USER INFO======================================");
-			System.out.println(new ObjectMapper().writeValueAsString(oAuth2User.getAttributes()));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-
 		Member member = null;
 		String OAuth2Id = null;
 		String email = null;
@@ -59,18 +50,17 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 
 				member = memberRepository.findMemberByOAuth2Id(OAuth2Id);
 
-				// 멤버가 존재하면 해당 멤버 정보 반환
-				if (member != null) {
-					return new CustomOAuth2User(Long.toString(member.getMemberId()));
-				}
+				if (member != null) { return member; }
 
 				Map<String, String> kakaoAccountInfo = oAuth2User.getAttribute("kakao_account");
-				Map<String, String> kakaoProfileInfo = oAuth2User.getAttribute("properties");
+				// Map<String, String> kakaoProfileInfo = oAuth2User.getAttribute("properties");
 
 				int profileRandomNum = ThreadLocalRandom.current().nextInt(1, 31);
 
-				email = kakaoAccountInfo.get("email");
-				nickname = kakaoProfileInfo.get("nickname");
+				assert kakaoAccountInfo != null;
+				email = kakaoAccountInfo.getOrDefault("email", null);
+				nickname = kakaoAccountInfo.getOrDefault("nickname", null);
+
 				profileImgUrl = profileBaseUrl + profileRandomNum + ".webp";
 				provider = KAKAO;
 
@@ -79,7 +69,6 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 				break;
 		}
 
-		// 에러 처리
 		if (provider == null) {
 			return null;
 		}
@@ -92,11 +81,8 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 			.provider(provider)
 			.build();
 
-		log.info(member.toString());
-
-		// 존재 확인 후 save
 		member = memberRepository.save(member);
 
-		return new CustomOAuth2User(Long.toString(member.getMemberId()));
+		return member;
 	}
 }

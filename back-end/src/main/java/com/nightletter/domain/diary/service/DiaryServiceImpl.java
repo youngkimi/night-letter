@@ -3,7 +3,6 @@ package com.nightletter.domain.diary.service;
 import static com.nightletter.global.exception.CommonErrorCode.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,8 +14,6 @@ import java.util.stream.Stream;
 import org.springframework.data.domain.Page;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -24,7 +21,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.nightletter.domain.diary.dto.recommend.EmbedVector;
 import com.nightletter.domain.diary.dto.recommend.RecommendDataResponse;
-import com.nightletter.domain.diary.dto.recommend.RecommendDiaryResponse;
 import com.nightletter.domain.diary.dto.request.DiaryCreateEvent;
 import com.nightletter.domain.diary.dto.request.DiaryCreateRequest;
 import com.nightletter.domain.diary.dto.request.DiaryDisclosureRequest;
@@ -80,7 +76,6 @@ public class DiaryServiceImpl implements DiaryService {
 	private final GptServiceImpl gptServiceImpl;
 	private final TarotService tarotServiceImpl;
 	private final TarotFutureRedisRepository futureRedisRepository;
-	private final TarotPastRedisRepository pastRedisRepository;
 	private final RecommendedDiaryRepository recommendedDiaryRepository;
 	private final NotificationService notificationService;
 
@@ -91,7 +86,7 @@ public class DiaryServiceImpl implements DiaryService {
 
 	@Override
 	@Transactional
-	public TarotResponse createDiary(DiaryCreateRequest diaryRequest) {
+	public TarotResponse createDiary(DiaryCreateRequest diaryRequest, Member member) {
 
 		// 추천 사연 + 임베딩 벡터 수신
 		RecommendDataResponse recDataResponse = fetchRecData(diaryRequest);
@@ -106,7 +101,7 @@ public class DiaryServiceImpl implements DiaryService {
 		Tarot futureTarot = tarotService.makeRandomTarot(pastTarot.getId(), nowTarot.getId());
 
 		// 2. 다이어리 생성. GPT 코멘트는 이후 업데이트.
-		Diary userDiary = diaryRequest.toEntity(getCurrentMember(), embedVector);
+		Diary userDiary = diaryRequest.toEntity(member, embedVector);
 		userDiary.addDiaryTarot(pastTarot, DiaryTarotType.PAST);
 		userDiary.addDiaryTarot(nowTarot, DiaryTarotType.NOW);
 		userDiary.addDiaryTarot(futureTarot, DiaryTarotType.FUTURE);
@@ -117,11 +112,11 @@ public class DiaryServiceImpl implements DiaryService {
 
 		// TODO 일괄 수정 예정
 
-		futureRedisRepository.save(FutureTarot.unflipped(getCurrentMemberId()));
+		futureRedisRepository.save(FutureTarot.unflipped(member.getMemberId()));
 
 		DiaryCreateEvent event = DiaryCreateEvent.builder()
 			.diaryId(userDiary.getDiaryId())
-			.memberId(getCurrentMemberId())
+			.memberId(member.getMemberId())
 			.recommendedDiaryIdList(recDiariesId)
 			.build();
 
@@ -147,11 +142,9 @@ public class DiaryServiceImpl implements DiaryService {
 
 		Member member = memberRepository.findByMemberId(event.getMemberId());
 
-		// 2. 추천 다이어리 저장 및 추천 다이어리 실시간 알림.
-		// 추천 다이어리 저장.
-
 		List<Diary> recDiaries = getRecommendedDiaries(event.getRecommendedDiaryIdList());
 
+		// TODO 배치 처리
 		for (Diary diary : recDiaries) {
 			RecommendedDiary recommendedDiary = RecommendedDiary.builder()
 				.diary(diary)
@@ -168,9 +161,6 @@ public class DiaryServiceImpl implements DiaryService {
 	@Transactional
 	@KafkaListener(topics = "create-diary", groupId = "gpt_diary")
 	public void sendGPTComment(DiaryCreateEvent event) {
-
-		System.out.println("RECEIVE_GPT_EVENT: event: " + event);
-
 
 		if (event == null || event.getRecommendedDiaryIdList() == null) {
 			// 에러 처리 .
@@ -221,22 +211,10 @@ public class DiaryServiceImpl implements DiaryService {
 		return recommendDiaries;
 	}
 
-	private List<RecommendDiaryResponse> getRecDiaries(List<Long> diariesId) {
-		List<RecommendDiaryResponse> recommendDiaries = diaryRepository
-			.findRecommendDiaries(diariesId, getCurrentMember());
-		if (recommendDiaries.isEmpty()) {
-			throw new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "RECOMMEND DIARIES NOT FOUND");
-		}
-		log.info("============================= {} ", recommendDiaries.toString());
-		return recommendDiaries;
-	}
-
 	@Override
 	public Optional<DiaryResponse> updateDiaryDisclosure(DiaryDisclosureRequest request) {
 
 		try {
-			System.out.println(request.toString());
-
 			Diary diary = diaryRepository.getReferenceById(request.getDiaryId());
 
 			diary.modifyDiaryDisclosure(request.getType());
@@ -250,7 +228,7 @@ public class DiaryServiceImpl implements DiaryService {
 	}
 
 	@Override
-	public List<DiaryResponse> findDiaries(DiaryListRequest request) {
+	public List<DiaryResponse> findDiaries(DiaryListRequest request, Member member) {
 
 		if (request.getEndDate().isBefore(request.getSttDate())) {
 			throw new InvalidParameterException(INVALID_PARAMETER, "END_DATE MUST BE SAME OR LATER THAN STT_DATE");
@@ -262,7 +240,7 @@ public class DiaryServiceImpl implements DiaryService {
 		}
 
 		Map<LocalDate, DiaryResponse> diaryMap = diaryRepository
-			.findDiariesByMember(getCurrentMember(), request)
+			.findDiariesByMember(member, request)
 			.stream()
 			.collect(Collectors
 				.toMap(Diary::getDate, Diary::toDiaryResponse));
@@ -276,7 +254,7 @@ public class DiaryServiceImpl implements DiaryService {
 		 */
 		// TODO 존재하지 않는 경우 처리.
 
-		futureRedisRepository.findById(getCurrentMemberId())
+		futureRedisRepository.findById(member.getMemberId())
 			.ifPresent(futureTarot -> {
 				if (!futureTarot.getFlipped() && diaryMap.get(today) != null) {
 					diaryMap.get(today).setFutureCard(null);
@@ -317,9 +295,9 @@ public class DiaryServiceImpl implements DiaryService {
 	}
 
 	@Override
-	public TodayDiaryResponse isTodayDiaryWritten() {
+	public TodayDiaryResponse isTodayDiaryWritten(Member member) {
 
-		List<TodayTarot> tarots = diaryRepository.findTodayDiary(getCurrentMember(), getToday());
+		List<TodayTarot> tarots = diaryRepository.findTodayDiary(member, getToday());
 
 		Optional<TodayTarot> pastTarot = tarots.stream()
 			.filter(tarot -> tarot.getCardType() == DiaryTarotType.PAST)
@@ -344,8 +322,8 @@ public class DiaryServiceImpl implements DiaryService {
 
 		TodayDiaryResponse response = TodayDiaryResponse.of(tarots);
 
-		FutureTarot futureTarot = futureRedisRepository.findById(getCurrentMemberId())
-			.orElseGet(() ->null);
+		FutureTarot futureTarot = futureRedisRepository.findById(member.getMemberId())
+			.orElseGet(() -> null);
 
 		if (futureTarot != null && ! futureTarot.getFlipped()) {
 			response.setFutureCard(null);
@@ -373,7 +351,7 @@ public class DiaryServiceImpl implements DiaryService {
 	}
 
 	@Override
-	public Optional<String> createDiaryShareUrl(Long diaryId) {
+	public Optional<String> createDiaryShareUrl(Long diaryId, Member member) {
 		// 해당 일기와 유사한 일기 두개 더 추천 받기
 		// 추천받은 일기 id 가져오기 []
 		List<Long> sharedDiaries = new LinkedList<>();
@@ -382,8 +360,6 @@ public class DiaryServiceImpl implements DiaryService {
 		sharedDiaries.add(diaryId);
 		sharedDiaries.add(1L);
 		sharedDiaries.add(2L);
-
-		Integer memberId = getCurrentMember().getMemberId();
 
 		// 일기 id [] redis에 저장하기.
 
@@ -401,20 +377,17 @@ public class DiaryServiceImpl implements DiaryService {
 	}
 
 	@Override
-	public Page<DiaryScrapResponse> findScrappedRecommends(Integer pageNo) {
-		return diaryRepository.findScrappedDiaryPages(getCurrentMemberId(), pageNo);
+	public Page<DiaryScrapResponse> findScrappedRecommends(Integer pageNo, Member member) {
+		return diaryRepository.findScrappedDiaryPages(member.getMemberId(), pageNo);
 	}
 
 	@Transactional
 	@Override
-	public void scrapDiary(Long diaryId) {
+	public void scrapDiary(Long diaryId, Member member) {
 
-		Member member = getCurrentMember();
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() ->
 				new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "Diary Not Found"));
-
-		System.out.println("SAVING ====");
 
 		Scrap scrap = Scrap.builder()
 			.member(member)
@@ -428,8 +401,7 @@ public class DiaryServiceImpl implements DiaryService {
 
 	@Transactional
 	@Override
-	public void unscrapDiary(Long diaryId) {
-		Member member = getCurrentMember();
+	public void unscrapDiary(Long diaryId, Member member) {
 		Diary diary = diaryRepository.findById(diaryId)
 			.orElseThrow(() ->
 				new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "Diary Not Found"));
@@ -437,21 +409,11 @@ public class DiaryServiceImpl implements DiaryService {
 		long result = scrapRepository.deleteByMemberAndDiary(member, diary);
 
 		// TODO if result is 0, throw a exception
-
 	}
 
 	@Override
-	public List<DiaryRecResponse> findTodayRecommendedDiaries() {
-		return diaryRepository.findTodayDiaryRecommends(getCurrentMember(), getToday());
-	}
-
-	private Member getCurrentMember() {
-		return memberRepository.findByMemberId(getCurrentMemberId());
-	}
-
-	private Integer getCurrentMemberId() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return Integer.parseInt((String)authentication.getPrincipal());
+	public List<DiaryRecResponse> findTodayRecommendedDiaries(Member member) {
+		return diaryRepository.findTodayDiaryRecommends(member, getToday());
 	}
 
 	private LocalDate getToday() {
