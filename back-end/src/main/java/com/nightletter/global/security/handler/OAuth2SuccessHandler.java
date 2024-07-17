@@ -42,7 +42,18 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		HttpServletResponse response,
 		Authentication authentication
 	) {
-		Optional.ofNullable(authentication)
+		// Optional.ofNullable(authentication)
+		// 	.map(Authentication::getPrincipal)
+		// 	.filter(Member.class::isInstance)
+		// 	.map(Member.class::cast)
+		// 	.map(member -> jwtProvider.create(member.getMemberId().toString()))
+		// 	.map(this::getAccessCookie)
+		// 	.ifPresentOrElse(
+		// 		cookie -> sendSuccessResponse(response, cookie),
+		// 		this::handleAuthenticationFailure
+		// 	);
+
+		Optional.of(authentication)
 			.map(Authentication::getPrincipal)
 			.filter(Member.class::isInstance)
 			.map(Member.class::cast)
@@ -52,6 +63,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 				cookie -> sendSuccessResponse(response, cookie),
 				this::handleAuthenticationFailure
 			);
+
 	}
 
 	private ResponseCookie getAccessCookie(String token) {

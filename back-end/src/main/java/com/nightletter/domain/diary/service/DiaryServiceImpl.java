@@ -4,6 +4,7 @@ import static com.nightletter.global.exception.CommonErrorCode.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import com.nightletter.domain.diary.dto.request.DiaryDisclosureRequest;
 import com.nightletter.domain.diary.dto.request.DiaryListRequest;
 import com.nightletter.domain.diary.dto.response.DiaryRecResponse;
 import com.nightletter.domain.diary.dto.response.DiaryResponse;
+import com.nightletter.domain.diary.dto.response.DiaryResponseQuery;
 import com.nightletter.domain.diary.dto.response.DiaryScrapResponse;
 import com.nightletter.domain.diary.dto.response.FutureTarotResponse;
 import com.nightletter.domain.diary.dto.response.TodayDiaryResponse;
@@ -234,16 +236,18 @@ public class DiaryServiceImpl implements DiaryService {
 			throw new InvalidParameterException(INVALID_PARAMETER, "END_DATE MUST BE SAME OR LATER THAN STT_DATE");
 		}
 
-		// 오늘 일자 LIMIT
-		if (request.getEndDate().isAfter(getToday())) {
-			request.setEndDate(getToday());
-		}
+		request.setEndDate(request.getEndDate().isAfter(getToday()) ? getToday() : request.getEndDate());
+
+		// Map<LocalDate, DiaryResponse> diaryMap = diaryRepository
+		// 	.findDiariesByMember(member, request)
+		// 	.stream()
+		// 	.collect(Collectors
+		// 		.toMap(Diary::getDate, Diary::toDiaryResponse));
 
 		Map<LocalDate, DiaryResponse> diaryMap = diaryRepository
 			.findDiariesByMember(member, request)
 			.stream()
-			.collect(Collectors
-				.toMap(Diary::getDate, Diary::toDiaryResponse));
+			.collect(Collectors.toMap(Diary::getDate, Diary::toDiaryResponse, (v1, v2) -> v1, LinkedHashMap::new));
 
 		LocalDate today = getToday();
 
@@ -254,32 +258,53 @@ public class DiaryServiceImpl implements DiaryService {
 		 */
 		// TODO 존재하지 않는 경우 처리.
 
+		// futureRedisRepository.findById(member.getMemberId())
+		// 	.ifPresent(futureTarot -> {
+		// 		if (!futureTarot.getFlipped() && diaryMap.get(today) != null) {
+		// 			diaryMap.get(today).setFutureCard(null);
+		// 			diaryMap.get(today).setGptComment(null);
+		// 		}
+		// 	}
+		// );
+
 		futureRedisRepository.findById(member.getMemberId())
+			.filter(futureTarot -> !futureTarot.getFlipped())
 			.ifPresent(futureTarot -> {
-				if (!futureTarot.getFlipped() && diaryMap.get(today) != null) {
-					diaryMap.get(today).setFutureCard(null);
-					diaryMap.get(today).setGptComment(null);
+				DiaryResponse todayResponse = diaryMap.get(today);
+				if (todayResponse != null) {
+					todayResponse.setFutureCard(null);
+					todayResponse.setGptComment(null);
 				}
-			}
-		);
+			});
 
 		// 쿼리 결과에 오늘이 포함되어야 하고, MAP 내부에 오늘에 대한 값이 없는 경우
 
-		if (! (today.isAfter(request.getEndDate()) || today.isBefore(request.getSttDate()))) {
-			if (! diaryMap.containsKey(today)) {
-				diaryMap.put(today,
-					DiaryResponse.builder()
-						.pastCard(getUnfinishedDiaryOfToday())
-						.date(today)
-						.build()
-				);
-			}
+		// if (! (today.isAfter(request.getEndDate()) || today.isBefore(request.getSttDate()))) {
+		// 	if (! diaryMap.containsKey(today)) {
+		// 		diaryMap.put(today,
+		// 			DiaryResponse.builder()
+		// 				.pastCard(getUnfinishedDiaryOfToday())
+		// 				.date(today)
+		// 				.build()
+		// 		);
+		// 	}
+		// }
+
+		if (today.isAfter(request.getSttDate()) && !today.isAfter(request.getEndDate()) && !diaryMap.containsKey(today)) {
+			diaryMap.put(today, DiaryResponse.builder()
+				.pastCard(getUnfinishedDiaryOfToday())
+				.date(today)
+				.build());
 		}
 
-		return Stream.iterate(request.getSttDate(),
-				date -> date.isBefore(request.getEndDate().plusDays(1)), date -> date.plusDays(1))
+		// return Stream.iterate(request.getSttDate(),
+		// 		date -> date.isBefore(request.getEndDate().plusDays(1)), date -> date.plusDays(1))
+		// 	.map(date -> diaryMap.getOrDefault(date, DiaryResponse.builder().date(date).build()))
+		// 	.toList();
+
+		return request.getSttDate().datesUntil(request.getEndDate().plusDays(1))
 			.map(date -> diaryMap.getOrDefault(date, DiaryResponse.builder().date(date).build()))
-			.toList();
+			.collect(Collectors.toList());
 	}
 
 	@Override

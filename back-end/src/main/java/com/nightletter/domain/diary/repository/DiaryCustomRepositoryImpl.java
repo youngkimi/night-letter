@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 
 import com.nightletter.domain.diary.dto.recommend.RecommendDiaryResponse;
 import com.nightletter.domain.diary.dto.request.DiaryListRequest;
+import com.nightletter.domain.diary.dto.response.DiaryResponseQuery;
 import com.nightletter.domain.diary.dto.response.DiaryRecResponse;
 import com.nightletter.domain.diary.dto.response.DiaryScrapResponse;
 import com.nightletter.domain.diary.dto.response.FutureTarotResponse;
@@ -29,7 +30,8 @@ import com.nightletter.domain.diary.entity.Diary;
 import com.nightletter.domain.diary.entity.DiaryOpenType;
 import com.nightletter.domain.diary.entity.DiaryTarotType;
 import com.nightletter.domain.member.entity.Member;
-import com.nightletter.domain.tarot.dto.TarotDto;
+import com.nightletter.domain.tarot.dto.TarotResponseQuery;
+import com.nightletter.domain.tarot.entity.TarotDirection;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -179,7 +181,37 @@ public class DiaryCustomRepositoryImpl implements DiaryCustomRepository {
 			.where(diary.writer.eq(member)
 				.and(diary.date.between(request.getSttDate(), request.getEndDate())))
 			.orderBy(diary.date.asc())
-			.distinct()
+			.fetch();
+	}
+
+	@Override
+	public List<DiaryResponseQuery> findDiariesByDuration(Member member, DiaryListRequest request) {
+
+		return queryFactory.select(
+			Projections.constructor(
+				DiaryResponseQuery.class,
+				diary.writer.memberId,
+				diary.diaryId,
+				diary.type,
+				diary.content,
+				diary.gptComment,
+				Projections.constructor(
+					TarotResponseQuery.class,
+						tarot.id,
+						tarot.name,
+						tarot.imgUrl,
+						tarot.keyword,
+						tarot.description,
+						tarot.dir
+				),
+				diary.date
+			))
+			.from(diary)
+			.leftJoin(diary.diaryTarots, diaryTarot).fetchJoin()
+			.leftJoin(diaryTarot.tarot, tarot).fetchJoin()
+			.where(diary.writer.eq(member)
+				.and(diary.date.between(request.getSttDate(), request.getEndDate())))
+			.orderBy(diary.date.asc())
 			.fetch();
 	}
 }

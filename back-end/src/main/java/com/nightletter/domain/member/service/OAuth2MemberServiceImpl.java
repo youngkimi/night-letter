@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.entity.Provider;
 import com.nightletter.domain.member.repository.MemberRepository;
+import com.nightletter.global.utils.Nickname;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,8 +59,9 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 				int profileRandomNum = ThreadLocalRandom.current().nextInt(1, 31);
 
 				assert kakaoAccountInfo != null;
+
 				email = kakaoAccountInfo.getOrDefault("email", null);
-				nickname = kakaoAccountInfo.getOrDefault("nickname", null);
+				nickname = Nickname.createRandom();
 
 				profileImgUrl = profileBaseUrl + profileRandomNum + ".webp";
 				provider = KAKAO;

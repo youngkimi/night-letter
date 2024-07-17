@@ -8,4 +8,8 @@ import lombok.Data;
 public class DiaryListRequest {
 	private LocalDate sttDate;
 	private LocalDate endDate;
+
+	public boolean isValid() {
+		return !endDate.isBefore(sttDate);
+	}
 }

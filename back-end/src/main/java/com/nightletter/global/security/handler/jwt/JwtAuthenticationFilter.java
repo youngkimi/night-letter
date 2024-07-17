@@ -41,14 +41,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-		Optional.of(parseBearerToken(request))
-			.map(jwtProvider::validate)
-			.ifPresentOrElse(token -> findMemberAndSetSecurityContext(token, request),
-				() -> log.info("No bearer token found")
-			);
+		try {
+			Optional.of(parseBearerToken(request))
+				.map(jwtProvider::validate)
+				.ifPresentOrElse(
+					token -> findMemberAndSetSecurityContext(token, request),
+					() -> log.info("No bearer token found")
+				);
+		} catch (Exception e) {
+			log.error("Authentication error", e);
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			return; // 인증 실패 시 필터 체인을 계속하지 않음
+		}
+		// Optional.of(parseBearerToken(request))
+		// 	.map(jwtProvider::validate)
+		// 	.ifPresentOrElse(token -> findMemberAndSetSecurityContext(token, request),
+		// 		() -> log.info("No bearer token found")
+		// 	);
 
 		filterChain.doFilter(request, response);
-
 	}
 
 	private void findMemberAndSetSecurityContext(AccessToken accessToken ,HttpServletRequest request) {
