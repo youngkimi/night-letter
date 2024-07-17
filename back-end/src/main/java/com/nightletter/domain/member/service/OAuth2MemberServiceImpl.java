@@ -58,8 +58,6 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 
 				int profileRandomNum = ThreadLocalRandom.current().nextInt(1, 31);
 
-				assert kakaoAccountInfo != null;
-
 				email = kakaoAccountInfo.getOrDefault("email", null);
 				nickname = Nickname.createRandom();
 
