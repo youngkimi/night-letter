@@ -10,23 +10,23 @@ import com.nightletter.domain.tarot.entity.Tarot;
 import com.querydsl.core.group.GroupBy;
 
 public interface TarotService {
-	Optional<TarotResponse> createRandomPastTarot();
+	Optional<TarotResponse> createRandomPastTarot(Member member);
 
-	Optional<TarotResponse> getPastTarot();
+	Optional<TarotResponse> getPastTarot(Member member);
 
-	Optional<TarotResponse> getNowTarot();
+	Optional<TarotResponse> getNowTarot(Member member);
 
 	Tarot findSimilarTarot(EmbedVector diaryEmbedVector);
 
-	TarotResponse findFutureTarot();
+	TarotResponse findFutureTarot(Member member);
 
 	Tarot makeRandomTarot(int... ignoreTarotsId);
 
-	Optional<Tarot> findPastTarot();
+	Optional<Tarot> findPastTarot(Member member);
 
-	Optional<FutureTarot> getFutureTarot();
+	Optional<FutureTarot> getFutureTarot(Member member);
 
-	Optional<FutureTarot>  updateWithNewEntity();
+	Optional<FutureTarot>  updateWithNewEntity(Member member);
 	Optional<FutureTarot>  updateOnlyFlipped(Integer memberId);
 
 }

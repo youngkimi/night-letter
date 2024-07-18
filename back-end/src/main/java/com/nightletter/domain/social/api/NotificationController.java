@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.social.dto.response.GptNotificationResponse;
 import com.nightletter.domain.social.dto.response.NotificationResponse;
 import com.nightletter.domain.social.dto.response.RecommendNotificationResponse;
 import com.nightletter.domain.social.entity.Notification;
 import com.nightletter.domain.social.service.NotificationService;
+import com.nightletter.global.common.CurrentMember;
 
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
@@ -51,9 +53,9 @@ public class NotificationController {
 	}
 
 	@GetMapping("")
-	public ResponseEntity<?> getAllNotifications() {
+	public ResponseEntity<?> getAllNotifications(@CurrentMember Member member) {
 
-		return ResponseEntity.ok(notificationService.getAllNotifications());
+		return ResponseEntity.ok(notificationService.getAllNotifications(member));
 	}
 
 	@PatchMapping("")

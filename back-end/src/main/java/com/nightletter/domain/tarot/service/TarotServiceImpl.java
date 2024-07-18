@@ -22,6 +22,7 @@ import com.nightletter.domain.diary.entity.Diary;
 import com.nightletter.domain.diary.entity.DiaryTarot;
 import com.nightletter.domain.diary.entity.DiaryTarotType;
 import com.nightletter.domain.diary.repository.DiaryRepository;
+import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.tarot.dto.RecTarotResponse;
 import com.nightletter.domain.tarot.dto.RecVectorResponse;
 import com.nightletter.domain.tarot.dto.TarotDto;
@@ -125,11 +126,11 @@ public class TarotServiceImpl implements TarotService {
 	}
 
 	@Override
-	public TarotResponse findFutureTarot() {
+	public TarotResponse findFutureTarot(Member member) {
 
 		// TODO TAROT FUTURE REDIS DIARY로  수정 필요.
 
-		FutureTarot futureTarot = futureRedisRepository.findById(getCurrentMemberId())
+		FutureTarot futureTarot = futureRedisRepository.findById(member.getMemberId())
 			.orElseThrow(() -> new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "FUTURE TAROT NOT FOUND"));
 
 		futureRedisRepository.save(
@@ -140,7 +141,7 @@ public class TarotServiceImpl implements TarotService {
 				.build()
 		);
 
-		List<Diary> diaries = diaryRepository.findAllByWriterMemberIdAndDate(getCurrentMemberId(), getToday());
+		List<Diary> diaries = diaryRepository.findAllByWriterMemberIdAndDate(member.getMemberId(), getToday());
 
 		// TODO INDEX ERROR 수정
 		Diary diary = diaries.get(0);
@@ -170,11 +171,7 @@ public class TarotServiceImpl implements TarotService {
 	}
 
 	@Override
-	public Optional<TarotResponse> createRandomPastTarot() {
-
-		// if (getPastTarot().isPresent()) {
-		// 	throw new DupRequestException(CommonErrorCode.DUPLICATED_REQUEST_ERROR, "ALREADY POPPED");
-		// }
+	public Optional<TarotResponse> createRandomPastTarot(Member member) {
 
 		int tarotId = new Random().nextInt(156) + 1;
 		TarotDirection direction = new Random().nextBoolean() ? TarotDirection.FORWARD : TarotDirection.REVERSE;
@@ -184,7 +181,7 @@ public class TarotServiceImpl implements TarotService {
 		// TODO
 		pastRedisRepository.save(
 			PastTarot.builder()
-				.memberId(getCurrentMemberId())
+				.memberId(member.getMemberId())
 				.tarotId(tarotId)
 				.direction(direction)
 				.expiredTime(expiredTime.toEpochSecond(ZoneOffset.UTC)
@@ -199,13 +196,12 @@ public class TarotServiceImpl implements TarotService {
 	}
 
 	@Override
-	public Optional<TarotResponse> getPastTarot() {
+	public Optional<TarotResponse> getPastTarot(Member member) {
 
-		// TODO 오늘 카드 제외. 
-		Integer memberId = getCurrentMemberId();
+		// TODO 오늘 카드 제외.
 
 		// 캐시 조회.
-		Optional<TarotResponse> response = pastRedisRepository.findById(memberId)
+		Optional<TarotResponse> response = pastRedisRepository.findById(member.getMemberId())
 			.map(info -> {
 				Tarot pastTarot = tarotRepository.findById(info.getTarotId())
 					.orElseThrow(() -> new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "TAROT CART  RESOURCE NOT FOUND"));
@@ -219,19 +215,17 @@ public class TarotServiceImpl implements TarotService {
 
 		// 없으면 RDB 조회
 
-		return tarotRepository.findPastTarot(getToday(), getCurrentMemberId())
+		return tarotRepository.findPastTarot(getToday(), member.getMemberId())
 				.map(tarot -> TarotResponse.of(tarot, tarot.getDir()));
 	}
 
 	@Override
-	public Optional<TarotResponse> getNowTarot() {
-		Integer memberId = getCurrentMemberId();
-
+	public Optional<TarotResponse> getNowTarot(Member member) {
 		// 캐시 조회.
 		// 없으면 RDB 조회
 		return Optional.ofNullable(
 			// 캐시 조회. 있으면
-			tarotRepository.findNowTarot(getToday(), getCurrentMemberId())
+			tarotRepository.findNowTarot(getToday(), member.getMemberId())
 				.map(tarot -> TarotResponse.of(tarot, tarot.getDir()))
 				.orElseThrow(() ->
 					new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "NOW TAROT NOT FOUND"))
@@ -259,20 +253,18 @@ public class TarotServiceImpl implements TarotService {
 	}
 
 	@Override
-	public Optional<Tarot> findPastTarot() {
+	public Optional<Tarot> findPastTarot(Member member) {
 		/**
 		 * RDB 이전에 Redis (오늘의 과거카드) 우선적으로 검색해야 함.
 		 */
-		Integer memberId = getCurrentMemberId();
-
 		return Optional.ofNullable(
 			// 캐시 조회. 있으면
-				pastRedisRepository.findById(memberId)
+				pastRedisRepository.findById(member.getMemberId())
 				.map(info -> tarotRepository.findById(info.getTarotId())
 				.orElseGet(() -> null)
 				)
 				.orElse(
-					tarotRepository.findPastTarot(getToday(), getCurrentMemberId())
+					tarotRepository.findPastTarot(getToday(), member.getMemberId())
 					.orElseGet(() -> null)
 				)
 		);
@@ -280,16 +272,16 @@ public class TarotServiceImpl implements TarotService {
 	}
 
 	@Override
-	public Optional<FutureTarot> getFutureTarot() {
+	public Optional<FutureTarot> getFutureTarot(Member member) {
 
-		return futureRedisRepository.findById(getCurrentMemberId());
+		return futureRedisRepository.findById(member.getMemberId());
 	}
 
 	@Override
-	public Optional<FutureTarot> updateWithNewEntity() {
-		FutureTarot futureTarot = futureRedisRepository.findById(getCurrentMemberId())
+	public Optional<FutureTarot> updateWithNewEntity(Member member) {
+		FutureTarot futureTarot = futureRedisRepository.findById(member.getMemberId())
 			.orElseGet(() -> FutureTarot.builder()
-				.memberId(getCurrentMemberId())
+				.memberId(member.getMemberId())
 				.build()
 			);
 
@@ -306,7 +298,7 @@ public class TarotServiceImpl implements TarotService {
 				.build()
 		);
 
-		return futureRedisRepository.findById(getCurrentMemberId());
+		return futureRedisRepository.findById(member.getMemberId());
 	}
 
 	@Override
@@ -318,12 +310,7 @@ public class TarotServiceImpl implements TarotService {
 
 		futureRedisRepository.save(futureTarot);
 
-		return futureRedisRepository.findById(getCurrentMemberId());
-	}
-
-	private Integer getCurrentMemberId() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return Integer.parseInt((String)authentication.getPrincipal());
+		return futureRedisRepository.findById(memberId);
 	}
 
 	private LocalDate getToday() {

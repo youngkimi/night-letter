@@ -14,5 +14,5 @@ public interface ChatService {
 	public ChatResponse sendMessage(Integer memberId, Integer roomId, String message);
 	public Page<ChatResponse> findChatByChatroomId(Integer memberId, int chatroomId, int pageNo);
 
-	public void joinChatroom(Integer roomId);
+	public void joinChatroom(Member member, Integer roomId);
 }

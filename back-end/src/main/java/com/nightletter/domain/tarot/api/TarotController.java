@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.tarot.dto.TarotResponse;
 import com.nightletter.domain.tarot.service.TarotService;
+import com.nightletter.global.common.CurrentMember;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,38 +29,38 @@ public class TarotController {
 	private final TarotService tarotService;
 
 	@GetMapping("/future")
-	public ResponseEntity<TarotResponse> findFutureTarot() {
-		TarotResponse futureTarot = tarotService.findFutureTarot();
+	public ResponseEntity<TarotResponse> findFutureTarot(@CurrentMember Member member) {
+		TarotResponse futureTarot = tarotService.findFutureTarot(member);
 		return ResponseEntity.status(HttpStatus.OK).body(futureTarot);
 	}
 
 	@GetMapping("/past")
-	public ResponseEntity<?> findPastTarot() {
+	public ResponseEntity<?> findPastTarot(@CurrentMember Member member) {
 
-		return tarotService.getPastTarot()
+		return tarotService.getPastTarot(member)
 			.map(ResponseEntity::ok)
 			.orElse(ResponseEntity.notFound().build());
 	}
 
 	@GetMapping("/present")
-	public ResponseEntity<?> findNowTarot() {
+	public ResponseEntity<?> findNowTarot(@CurrentMember Member member) {
 
-		return tarotService.getNowTarot().map(ResponseEntity::ok)
+		return tarotService.getNowTarot(member).map(ResponseEntity::ok)
 			.orElse(ResponseEntity.notFound().build());
 	}
 
 	// TODO REMOVE AFTER TEST
 	@GetMapping("/past-test")
-	public ResponseEntity<?> findTestPastTarot() {
+	public ResponseEntity<?> findTestPastTarot(@CurrentMember Member member) {
 
-		return tarotService.findPastTarot().map(ResponseEntity::ok)
+		return tarotService.findPastTarot(member).map(ResponseEntity::ok)
 				.orElse(ResponseEntity.notFound().build());
 	}
 
 	@PostMapping("/past")
-	public ResponseEntity<?> addPastTarot() {
+	public ResponseEntity<?> addPastTarot(@CurrentMember Member member) {
 
-		Optional<TarotResponse> response = tarotService.createRandomPastTarot();
+		Optional<TarotResponse> response = tarotService.createRandomPastTarot(member);
 
 		if (response.isEmpty())
 			return databaseError();
@@ -66,13 +68,13 @@ public class TarotController {
 	}
 
 	@GetMapping("/test")
-	public ResponseEntity<?> getFutureTarotTTL() {
-		return ResponseEntity.ok(tarotService.getFutureTarot());
+	public ResponseEntity<?> getFutureTarotTTL(@CurrentMember Member member) {
+		return ResponseEntity.ok(tarotService.getFutureTarot(member));
 	}
 
 	@PatchMapping("/test-entity")
-	public ResponseEntity<?> updateWithNewEntity() {
-		return ResponseEntity.ok(tarotService.updateWithNewEntity());
+	public ResponseEntity<?> updateWithNewEntity(@CurrentMember Member member) {
+		return ResponseEntity.ok(tarotService.updateWithNewEntity(member));
 	}
 
 }

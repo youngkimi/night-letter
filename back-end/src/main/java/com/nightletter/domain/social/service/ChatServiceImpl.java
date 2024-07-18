@@ -57,12 +57,10 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public void joinChatroom(Integer roomId) {
+	public void joinChatroom(Member member, Integer roomId) {
 
 		Chatroom chatroom = chatroomRepository.findById(roomId)
 			.orElseThrow();
-
-		Member member = getCurrentMember();
 
 		Participant participant = Participant.builder()
 			.chatroom(chatroom)

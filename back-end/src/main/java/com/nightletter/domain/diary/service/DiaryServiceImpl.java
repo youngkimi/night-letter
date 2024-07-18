@@ -52,6 +52,7 @@ import com.nightletter.domain.tarot.repository.TarotFutureRedisRepository;
 import com.nightletter.domain.tarot.repository.TarotPastRedisRepository;
 import com.nightletter.domain.tarot.service.TarotService;
 import com.nightletter.domain.tarot.service.TarotServiceImpl;
+import com.nightletter.global.common.CurrentMember;
 import com.nightletter.global.common.ResponseDto;
 import com.nightletter.global.exception.CommonErrorCode;
 import com.nightletter.global.exception.InvalidParameterException;
@@ -98,7 +99,7 @@ public class DiaryServiceImpl implements DiaryService {
 		// 1. 임베딩 벡터 기반 현재 카드 추출, 응답.
 		// TODO: WRAP WITH OPTIONAL
 		Tarot nowTarot = tarotService.findSimilarTarot(embedVector);
-		Tarot pastTarot = tarotService.findPastTarot()
+		Tarot pastTarot = tarotService.findPastTarot(member)
 			.orElseThrow(() -> new ResourceNotFoundException(RESOURCE_NOT_FOUND, "PAST TAROT NOT FOUND"));
 		Tarot futureTarot = tarotService.makeRandomTarot(pastTarot.getId(), nowTarot.getId());
 
@@ -292,7 +293,7 @@ public class DiaryServiceImpl implements DiaryService {
 
 		if (today.isAfter(request.getSttDate()) && !today.isAfter(request.getEndDate()) && !diaryMap.containsKey(today)) {
 			diaryMap.put(today, DiaryResponse.builder()
-				.pastCard(getUnfinishedDiaryOfToday())
+				.pastCard(getUnfinishedDiaryOfToday(member))
 				.date(today)
 				.build());
 		}
@@ -330,7 +331,7 @@ public class DiaryServiceImpl implements DiaryService {
 
 		if (pastTarot.isEmpty()) {
 
-			TarotDto pastTarotDto = getUnfinishedDiaryOfToday();
+			TarotDto pastTarotDto = getUnfinishedDiaryOfToday(member);
 
 			if (pastTarotDto != null) {
 				TodayTarot tempPastTarot = TodayTarot.builder()
@@ -446,9 +447,9 @@ public class DiaryServiceImpl implements DiaryService {
 			LocalDate.now() : LocalDate.now().minusDays(1);
 	}
 
-	private TarotDto getUnfinishedDiaryOfToday() {
+	private TarotDto getUnfinishedDiaryOfToday(@CurrentMember Member member) {
 
-		return tarotServiceImpl.findPastTarot()
+		return tarotServiceImpl.findPastTarot(member)
 				.map(pastTarot -> TarotDto.of(pastTarot, pastTarot.getDir()))
 				.orElseGet(() -> null);
 	}

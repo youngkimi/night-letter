@@ -34,13 +34,13 @@ public class NotificationServiceImpl implements NotificationService {
 	private final NotificationRepository notificationRepository;
 
 	@Override
-	public List<NotificationResponse> getAllNotifications() {
+	public List<NotificationResponse> getAllNotifications(Member member) {
 
 		LocalDateTime todayStdTime = LocalDateTime.of(getToday(), LocalTime.of(4, 0));
 
 		System.out.println(todayStdTime);
 
-		List<NotificationQueryResponse> notifications = notificationRepository.findAllNotifications(getCurrentMember());
+		List<NotificationQueryResponse> notifications = notificationRepository.findAllNotifications(member);
 
 		return notifications.stream().map(NotificationQueryResponse::toResponse).toList();
 	}

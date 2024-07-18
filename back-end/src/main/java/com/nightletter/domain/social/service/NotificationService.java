@@ -10,7 +10,7 @@ import com.nightletter.global.common.CurrentMember;
 
 public interface NotificationService {
 
-	public List<NotificationResponse> getAllNotifications();
+	public List<NotificationResponse> getAllNotifications(Member member);
 	public Optional<NotificationResponse> updateNotificationIsRead(long notificationId);
 	public void deleteNotification(long notificationId);
 	public void sendNotificationToUser(NotificationType type, Member member);
