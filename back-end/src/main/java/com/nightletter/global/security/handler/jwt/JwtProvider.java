@@ -1,10 +1,12 @@
 package com.nightletter.global.security.handler.jwt;
 
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.SignatureException;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,8 +25,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
+@Slf4j
 @Component
 public class JwtProvider {
 
@@ -54,37 +58,14 @@ public class JwtProvider {
 			.compact();
 	}
 
-	// public String validate(String jwt) {
-	//
-	// 	String subject = null;
-	// 	Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-	//
-	// 	try {
-	// 		subject = Jwts.parserBuilder()
-	// 			.setSigningKey(key)
-	// 			.build()
-	// 			.parseClaimsJws(jwt)
-	// 			.getBody()
-	// 			.getSubject();
-	//
-	// 	} catch (Exception e) {
-	// 		e.printStackTrace();
-	// 		return null;
-	// 	}
-	//
-	// 	System.out.println(subject);
-	//
-	// 	return subject;
-	// }
-
-	public AccessToken validate(String jwt) {
+	public Optional<AccessToken> validate(String jwt) {
 
 		String subject = null;
 		String role = null;
 
-		Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-
 		try {
+			Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+
 			Claims claims = Jwts.parserBuilder()
 				.setSigningKey(key)
 				.build()
@@ -95,29 +76,13 @@ public class JwtProvider {
 
 			role = claims.get("role").toString();
 
-			// Object parsedRoles = claims.get("role");
-			//
-			// List<GrantedAuthority> convertedRoles = null;
-			//
-			// if (parsedRoles instanceof List<?> roles) {
-			//
-			// 	if (! roles.stream()
-			// 		.allMatch(role -> role instanceof String)) {
-			// 		return null;
-			// 	}
-			//
-			// 	convertedRoles = roles.stream()
-			// 		.map(role -> new SimpleGrantedAuthority(role.toString()))
-			// 		.collect(Collectors.toList());
-			// }
-
-			return AccessToken.builder()
+			return Optional.of(AccessToken.builder()
 				.memberId(Integer.parseInt(subject))
 				.role(new SimpleGrantedAuthority(role))
-				.build();
-
+				.build());
 		} catch (Exception e) {
-			throw new ValidationException(CommonErrorCode.INVALID_AUTHORIZATION, "Access Token is invalid");
+			log.error("INVALID KEY ERROR");
+			return Optional.empty();
 		}
 
 	}

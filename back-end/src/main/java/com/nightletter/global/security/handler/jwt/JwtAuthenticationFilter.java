@@ -16,9 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.repository.MemberRepository;
-import com.nightletter.global.exception.CommonErrorCode;
-import com.nightletter.global.exception.ResourceNotFoundException;
-import com.nightletter.global.exception.ValidationException;
 import com.nightletter.global.security.token.AccessToken;
 
 import jakarta.servlet.FilterChain;
@@ -41,50 +38,56 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
-		try {
-			Optional.of(parseBearerToken(request))
-				.map(jwtProvider::validate)
-				.ifPresentOrElse(
-					token -> findMemberAndSetSecurityContext(token, request),
-					() -> log.info("No bearer token found")
-				);
-		} catch (Exception e) {
-			log.error("Authentication error", e);
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			return; // 인증 실패 시 필터 체인을 계속하지 않음
+		Optional<String> tokenOptional = parseBearerToken(request);
+
+		if (tokenOptional.isEmpty()) {
+			filterChain.doFilter(request, response);
+			return ;
 		}
-		// Optional.of(parseBearerToken(request))
-		// 	.map(jwtProvider::validate)
-		// 	.ifPresentOrElse(token -> findMemberAndSetSecurityContext(token, request),
-		// 		() -> log.info("No bearer token found")
-		// 	);
+
+		Optional<AccessToken> token = jwtProvider.validate(tokenOptional.get());
+
+		if (token.isEmpty()) {
+			log.info("Bearer token is invalid");
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			return;
+		}
+
+		if (! findMemberAndSetSecurityContext(token.get(), request)) {
+			log.info("Member not found for the given token");
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			return;
+		}
 
 		filterChain.doFilter(request, response);
 	}
 
-	private void findMemberAndSetSecurityContext(AccessToken accessToken ,HttpServletRequest request) {
-
-		memberRepository.findById(accessToken.getMemberId())
-			.ifPresentOrElse(
-				member -> setSecurityContext(member, accessToken, request),
-				() -> {
-					throw new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "MEMBER IS NOT FOUND");
-				}
-			);
+	private boolean findMemberAndSetSecurityContext(AccessToken accessToken, HttpServletRequest request) {
+		return memberRepository.findById(accessToken.getMemberId())
+			.map(member -> setSecurityContext(member, accessToken, request))
+			.orElseGet(() -> {
+				log.warn("Member not found for ID: {}", accessToken.getMemberId());
+				return false;
+			});
 	}
 
-	private void setSecurityContext(Member member, AccessToken accessToken ,HttpServletRequest request) {
-		SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-		AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member, null, List.of(accessToken.getRole()));
-		authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-		securityContext.setAuthentication(authenticationToken);
-		SecurityContextHolder.setContext(securityContext);
+	private boolean setSecurityContext(Member member, AccessToken accessToken ,HttpServletRequest request) {
+		try {
+			SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+			AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member, null, List.of(accessToken.getRole()));
+			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+			securityContext.setAuthentication(authenticationToken);
+			SecurityContextHolder.setContext(securityContext);
+			return true;
+		} catch (Exception e) {
+			log.error("Error setting security context", e);
+			return false;
+		}
 	}
 
-	private String parseBearerToken(HttpServletRequest request) {
+	private Optional<String> parseBearerToken(HttpServletRequest request) {
 		return extractTokenFromCookie(request)
-				.orElse(extractTokenFromHeader(request)
-					.orElseThrow(() -> new ValidationException(CommonErrorCode.INVALID_AUTHORIZATION, "NOT A VALID TOKEN")));
+				.or(() -> extractTokenFromHeader(request));
 	}
 
 	private static Optional<String> extractTokenFromCookie(HttpServletRequest request) {
