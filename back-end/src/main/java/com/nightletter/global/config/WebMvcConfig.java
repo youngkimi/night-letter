@@ -12,6 +12,6 @@ import com.nightletter.global.security.handler.CurrentMemberArgumentResolver;
 public class WebMvcConfig implements WebMvcConfigurer {
 
 	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		resolvers.add(new CurrentMemberArgumentResolver());
+		// resolvers.add(new CurrentMemberArgumentResolver());
 	}
 }
