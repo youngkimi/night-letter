@@ -5,6 +5,7 @@ import java.security.Principal;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.social.dto.response.ChatResponse;
 
 @Service

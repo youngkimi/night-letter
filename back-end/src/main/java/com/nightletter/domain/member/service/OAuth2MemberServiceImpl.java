@@ -58,7 +58,10 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 
 				int profileRandomNum = ThreadLocalRandom.current().nextInt(1, 31);
 
-				email = kakaoAccountInfo.getOrDefault("email", null);
+				if (kakaoAccountInfo != null) {
+					email = kakaoAccountInfo.getOrDefault("email", null);
+				}
+
 				nickname = Nickname.createRandom();
 
 				profileImgUrl = profileBaseUrl + profileRandomNum + ".webp";

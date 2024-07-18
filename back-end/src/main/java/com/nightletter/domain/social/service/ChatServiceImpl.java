@@ -53,7 +53,7 @@ public class ChatServiceImpl implements ChatService {
 	@Override
 	public Page<ChatResponse> findChatByChatroomId(Integer memberId, int chatroomId, int pageNo) {
 
-		return chatRepository.findChatPages(chatroomId, pageNo, getCurrentMemberId());
+		return chatRepository.findChatPages(chatroomId, pageNo, memberId);
 	}
 
 	@Override
@@ -73,15 +73,6 @@ public class ChatServiceImpl implements ChatService {
 		// TODO 동일한 유저 여러번 안들어가게 처리 확인
 		// 현재 Disconn 시 삭제 기능 없음. 만들지도 미지수.
 		participantRepository.save(participant);
-	}
-
-	private Member getCurrentMember() {
-		return memberRepository.findByMemberId(getCurrentMemberId());
-	}
-
-	private Integer getCurrentMemberId() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return Integer.parseInt((String)authentication.getPrincipal());
 	}
 
 }

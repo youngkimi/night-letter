@@ -19,16 +19,13 @@ public class MemberServiceImpl implements MemberService {
 	private final MemberRepository memberRepository;
 
 	@Override
-	public MemberNicknameResponse getMemberNickname() {
-		Member member = getCurrentMember();
-
+	public MemberNicknameResponse getMemberNickname(Member member) {
 		return new MemberNicknameResponse(member.getNickname());
 	}
 
 	@Transactional
 	@Override
-	public MemberNicknameResponse updateMemberNickname(String nickname) {
-		Member member = getCurrentMember();
+	public MemberNicknameResponse updateMemberNickname(Member member, String nickname) {
 		member.updateNickname(nickname);
 		memberRepository.save(member);
 
@@ -36,18 +33,8 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public void deleteMember() {
-		Member member = getCurrentMember();
+	public void deleteMember(Member member) {
 		memberRepository.delete(member);
-	}
-
-	private Member getCurrentMember() {
-		return memberRepository.findByMemberId(getCurrentMemberId());
-	}
-
-	private Integer getCurrentMemberId() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return Integer.parseInt((String)authentication.getPrincipal());
 	}
 
 }

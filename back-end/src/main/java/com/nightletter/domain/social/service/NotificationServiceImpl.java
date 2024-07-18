@@ -19,6 +19,7 @@ import com.nightletter.domain.social.dto.response.NotificationResponse;
 import com.nightletter.domain.social.entity.Notification;
 import com.nightletter.domain.social.entity.NotificationType;
 import com.nightletter.domain.social.repository.NotificationRepository;
+import com.nightletter.global.common.CurrentMember;
 import com.nightletter.global.exception.CommonErrorCode;
 import com.nightletter.global.exception.ResourceNotFoundException;
 
@@ -64,19 +65,6 @@ public class NotificationServiceImpl implements NotificationService {
 		notificationRepository.save(notification);
 	}
 
-	/**
-	 * Method For Test (Not Used)
-	 * @param notification
-	 */
-	@Override
-	public void sendNotificationToUser(NotificationResponse notification) {
-		messagingTemplate.convertAndSendToUser(
-			String.valueOf(getCurrentMemberId()),
-			"/notification",
-			notification.getTitle()
-		);
-	}
-
 	@Override
 	public void sendNotificationToUser(NotificationType type, Member member) {
 		Notification notification = Notification.builder()
@@ -93,15 +81,6 @@ public class NotificationServiceImpl implements NotificationService {
 			"/notification",
 			type.getTitle()
 		);
-	}
-
-	private Integer getCurrentMemberId() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return Integer.parseInt((String)authentication.getPrincipal());
-	}
-
-	private Member getCurrentMember() {
-		return memberRepository.findByMemberId(getCurrentMemberId());
 	}
 
 	private LocalDate getToday() {

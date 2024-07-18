@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.social.dto.request.ChatRequest;
 import com.nightletter.domain.social.dto.response.ChatResponse;
 import com.nightletter.domain.social.dto.response.GptNotificationResponse;
@@ -20,6 +21,7 @@ import com.nightletter.domain.social.dto.response.RecommendNotificationResponse;
 import com.nightletter.domain.social.entity.NotificationType;
 import com.nightletter.domain.social.service.ChatService;
 import com.nightletter.domain.social.service.NotificationService;
+import com.nightletter.global.common.CurrentMember;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,10 +39,6 @@ public class ChatController {
 		@RequestParam(name = "pageNo", defaultValue = "0", required = false) Integer pageNo,
 		Principal principal) {
 
-		System.out.println("find Chat By ChatroomId");
-		System.out.println("PRINCIPAL: " + principal);
-		System.out.println("member_id: " + principal.getName());
-
 		Integer memberId = Integer.valueOf(principal.getName());
 
 		return ResponseEntity.ok(chatService.findChatByChatroomId(memberId, chatroomId, pageNo));
@@ -48,35 +46,13 @@ public class ChatController {
 
 	private int testCall = 0;
 
-	@GetMapping("/send-notification")
-	@SendToUser("/notification")
-	public void sendNotification() {
-		testCall++;
-
-		GptNotificationResponse gpt = GptNotificationResponse.builder()
-			.type(NotificationType.GPT_COMMENT_ARRIVAL)
-			.title(NotificationType.GPT_COMMENT_ARRIVAL.getTitle())
-			.build();
-
-		RecommendNotificationResponse rec = RecommendNotificationResponse.builder()
-			.type(NotificationType.RECOMMEND_DIARIES_ARRIVAL)
-			.title(NotificationType.RECOMMEND_DIARIES_ARRIVAL.getTitle())
-			.build();
-
-		notificationService.sendNotificationToUser(
-			testCall % 2 == 0 ? gpt : rec
-		);
-	}
-
 	@MessageMapping("/{roomId}")
 	@SendTo("/room/{roomId}")
 	public ChatResponse sendMessage(
 		@DestinationVariable("roomId") Integer roomId,
 		@Payload ChatRequest request,
+		@CurrentMember Member member,
 		Principal principal) throws Exception {
-
-		// int memberId = testMemberCount / 3 + 1;
-		// ChatResponse response = chatService.sendMessage(memberId, roomId, request.getMessage());
 
 		System.out.println("PRINCIPAL: " + principal);
 		System.out.println("member_id: " + principal.getName());
