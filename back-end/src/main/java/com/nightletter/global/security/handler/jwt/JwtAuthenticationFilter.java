@@ -14,6 +14,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.nightletter.domain.member.dto.MemberDetails;
 import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.repository.MemberRepository;
 import com.nightletter.global.security.token.AccessToken;
@@ -74,7 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private boolean setSecurityContext(Member member, AccessToken accessToken ,HttpServletRequest request) {
 		try {
 			SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-			AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(member, null, List.of(accessToken.getRole()));
+			AbstractAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(new MemberDetails(member), null, List.of(accessToken.getRole()));
 			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 			securityContext.setAuthentication(authenticationToken);
 			SecurityContextHolder.setContext(securityContext);
