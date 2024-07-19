@@ -63,10 +63,7 @@ public class GptServiceImpl {
 		return new HttpEntity<>(requestDto, headers);
 	}
 
-	public Optional<GPTResponse> findGptComment() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		Member member = memberRepository.findByMemberId(Integer.parseInt((String)authentication.getPrincipal()));
-		// Diary diary = diaryRepository.findByDateAndWriter(LocalDate.now(), member);
+	public Optional<GPTResponse> findGptComment(Member member) {
 		List<Diary> diaries = diaryRepository.findAllByDateAndWriter(getToday(), member);
 		Diary diary = diaries.get(0);
 
@@ -92,7 +89,6 @@ public class GptServiceImpl {
 
 		response.setGptComment(diary.getGptComment());
 		return Optional.of(response);
-
 	}
 
 	private LocalDate getToday() {

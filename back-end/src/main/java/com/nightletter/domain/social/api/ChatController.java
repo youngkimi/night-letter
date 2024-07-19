@@ -54,9 +54,6 @@ public class ChatController {
 		@CurrentMember Member member,
 		Principal principal) throws Exception {
 
-		System.out.println("PRINCIPAL: " + principal);
-		System.out.println("member_id: " + principal.getName());
-
 		Integer memberId = Integer.valueOf(principal.getName());
 
 		return chatService.sendMessage(memberId, roomId, request.getMessage());

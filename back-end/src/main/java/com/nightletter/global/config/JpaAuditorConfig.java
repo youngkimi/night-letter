@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.nightletter.domain.member.dto.MemberDetails;
 import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.repository.MemberRepository;
 
@@ -25,6 +26,9 @@ public class JpaAuditorConfig implements AuditorAware<Integer> {
 			return Optional.empty();
 		}
 
-		return Optional.of(Integer.parseInt((String) authentication.getPrincipal()));
+		return Optional.of(
+			Integer.parseInt(
+				((MemberDetails) authentication.getPrincipal()).getUsername())
+		);
 	}
 }
