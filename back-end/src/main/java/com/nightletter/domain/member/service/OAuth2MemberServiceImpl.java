@@ -67,12 +67,16 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 				profileImgUrl = profileBaseUrl + profileRandomNum + ".webp";
 				provider = KAKAO;
 
+				log.info("Member info provided by Kakao");
+				log.info("user email: {}", email);
+
 				break;
 			case "apple":
 				break;
 		}
 
 		if (provider == null) {
+			log.error("provider is null");
 			return null;
 		}
 
@@ -85,6 +89,8 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 			.build();
 
 		member = memberRepository.save(member);
+
+		log.info("Current member well processed.");
 
 		return member;
 	}

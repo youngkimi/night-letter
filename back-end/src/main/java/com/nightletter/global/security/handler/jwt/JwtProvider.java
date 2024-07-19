@@ -81,7 +81,7 @@ public class JwtProvider {
 				.role(new SimpleGrantedAuthority(role))
 				.build());
 		} catch (Exception e) {
-			log.error("INVALID KEY ERROR");
+			log.error("Invalid key error");
 			return Optional.empty();
 		}
 
