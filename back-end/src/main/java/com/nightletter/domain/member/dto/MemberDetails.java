@@ -52,6 +52,10 @@ public class MemberDetails implements UserDetails {
 		return false;
 	}
 
+	public Member getMember() {
+		return member;
+	}
+
 	public MemberDetails of(Member member) {
 		return new MemberDetails(member);
 	}

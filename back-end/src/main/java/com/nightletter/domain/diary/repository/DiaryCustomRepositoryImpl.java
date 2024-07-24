@@ -178,7 +178,7 @@ public class DiaryCustomRepositoryImpl implements DiaryCustomRepository {
 			.from(diary)
 			.leftJoin(diary.diaryTarots, diaryTarot).fetchJoin()
 			.leftJoin(diaryTarot.tarot, tarot).fetchJoin()
-			.where(diary.writer.memberId.eq(member.getMemberId())
+			.where(diary.writer.eq(member)
 				.and(diary.date.between(request.getSttDate(), request.getEndDate())))
 			.orderBy(diary.date.asc())
 			.fetch();
