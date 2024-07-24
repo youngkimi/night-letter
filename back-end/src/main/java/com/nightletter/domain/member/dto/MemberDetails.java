@@ -28,6 +28,7 @@ public class MemberDetails implements UserDetails {
 
 	@Override
 	public String getUsername() {
+		System.out.println("Member Details Called");
 		return member.getMemberId().toString();
 	}
 

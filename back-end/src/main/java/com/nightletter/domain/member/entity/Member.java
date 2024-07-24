@@ -9,6 +9,7 @@ import java.util.Set;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.nightletter.domain.diary.entity.Scrap;
@@ -88,6 +89,7 @@ public class Member extends BaseTimeEntity implements OAuth2User {
 
 	@Override
 	public String getName() {
-		return null;
+		return this.memberId.toString();
 	}
+
 }
