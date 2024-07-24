@@ -51,7 +51,6 @@ public class ChatController {
 	public ChatResponse sendMessage(
 		@DestinationVariable("roomId") Integer roomId,
 		@Payload ChatRequest request,
-		@CurrentMember Member member,
 		Principal principal) throws Exception {
 
 		Integer memberId = Integer.valueOf(principal.getName());
