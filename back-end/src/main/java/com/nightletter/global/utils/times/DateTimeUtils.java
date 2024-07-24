@@ -36,10 +36,9 @@ public class DateTimeUtils {
 	}
 
 	public static Date tokenExpireDate() {
-		return Date.from(LocalDateTime.now().toInstant(ZoneOffset.of("+09:00")).plusMillis(accessTokenExpirationTime));
+		System.out.println(accessTokenExpirationTime);
+		return Date.from(LocalDateTime.now().plus(accessTokenExpirationTime, ChronoUnit.MILLIS).toInstant(ZoneOffset.of("+09:00")));
 	}
-
-
 
 	public static LocalDate getToday() {
 		return LocalTime.now().isAfter(LocalTime.of(4, 0)) ?
