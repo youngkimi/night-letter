@@ -14,8 +14,12 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class DateTimeUtils {
 
+	private static long accessTokenExpirationTime;
+
 	@Value("${jwt.access.expiration}")
-	private static Long accessTokenExpirationTime;
+	public void setAccessTokenExpirationTime(long value) {
+		accessTokenExpirationTime = value;
+	}
 
 	public static LocalDateTime nowFromZone() {
 		return ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();

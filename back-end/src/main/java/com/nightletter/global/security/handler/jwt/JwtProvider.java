@@ -16,7 +16,6 @@ import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.repository.MemberRepository;
 import com.nightletter.global.exception.CommonErrorCode;
 import com.nightletter.global.exception.ResourceNotFoundException;
-import com.nightletter.global.exception.ValidationException;
 import com.nightletter.global.security.token.AccessToken;
 import com.nightletter.global.utils.times.DateTimeUtils;
 
