@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class DateTimeUtils {
 
-	@Value("${JWT.access.expiration}")
+	@Value("${jwt.access.expiration}")
 	private static Long accessTokenExpirationTime;
 
 	public static LocalDateTime nowFromZone() {

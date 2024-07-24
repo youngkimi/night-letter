@@ -30,7 +30,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	@Value("${spring.security.provider.response-uri.kakao}")
 	private String tokenResponseURI;
 
-	@Value("${JWT.access.expiration}")
+	@Value("${jwt.access.expiration}")
 	private Long accessTokenExpirationTime;
 
 	private final JwtProvider jwtProvider;
