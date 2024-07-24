@@ -73,7 +73,11 @@ public class JwtProvider {
 
 			subject = claims.getSubject();
 
+			System.out.println("Subject : " + subject);
+
 			role = claims.get("role").toString();
+
+			System.out.println("Role : " + role);
 
 			return Optional.of(AccessToken.builder()
 				.memberId(Integer.parseInt(subject))
