@@ -31,7 +31,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	private String tokenResponseURI;
 
 	@Value("${JWT.access.expiration}")
-	private static Long accessTokenExpirationTime;
+	private Long accessTokenExpirationTime;
 
 	private final JwtProvider jwtProvider;
 
