@@ -34,6 +34,8 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
+		System.out.println("OAuth2 Requested Information Arrived From Provider");
+
 		OAuth2User oAuth2User = super.loadUser(userRequest);
 
 		String oauthClientName = userRequest.getClientRegistration().getClientName();
