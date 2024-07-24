@@ -12,7 +12,9 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DateTimeUtils {
 
 	private static long accessTokenExpirationTime;
