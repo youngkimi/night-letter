@@ -8,6 +8,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.TimeZone;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -25,9 +26,20 @@ public class DateTimeUtils {
 		return ZonedDateTime.now(ZoneId.of("Asia/Seoul")).toLocalDateTime();
 	}
 
-	public static Instant tokenExpireTime() {
-		return LocalDateTime.now().toInstant(ZoneOffset.of("+09:00")).plusMillis(accessTokenExpirationTime);
+	// public static Instant tokenExpireTime() {
+	// 	return LocalDateTime.now().toInstant(ZoneOffset.of("+09:00")).plusMillis(accessTokenExpirationTime);
+	// }
+
+	public static Date tokenIssuedDate() {
+		return Date.from(LocalDateTime.now().toInstant(ZoneOffset.of("+09:00")));
+		// return ;
 	}
+
+	public static Date tokenExpireDate() {
+		return Date.from(LocalDateTime.now().toInstant(ZoneOffset.of("+09:00")).plusMillis(accessTokenExpirationTime));
+	}
+
+
 
 	public static LocalDate getToday() {
 		return LocalTime.now().isAfter(LocalTime.of(4, 0)) ?

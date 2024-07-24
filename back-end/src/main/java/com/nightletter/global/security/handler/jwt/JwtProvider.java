@@ -39,8 +39,6 @@ public class JwtProvider {
 
 	public String create(String memberId) {
 
-		Date expiredDate = Date.from(DateTimeUtils.tokenExpireTime());
-
 		Key key = Keys.hmacShaKeyFor(secretKey.getBytes((StandardCharsets.UTF_8)));
 
 		Member member = memberRepository.findById(Integer.parseInt(memberId))
@@ -52,8 +50,8 @@ public class JwtProvider {
 		return Jwts.builder()
 			.signWith(key, SignatureAlgorithm.HS256)
 			.setSubject(memberId)
-			.setIssuedAt(new Date())
-			.setExpiration(expiredDate)
+			.setIssuedAt(DateTimeUtils.tokenIssuedDate())
+			.setExpiration(DateTimeUtils.tokenExpireDate())
 			.addClaims(roles)
 			.compact();
 	}
