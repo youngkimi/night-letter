@@ -4,8 +4,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.nightletter.domain.member.entity.Member;

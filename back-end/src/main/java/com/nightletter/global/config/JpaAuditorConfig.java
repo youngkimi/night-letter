@@ -4,22 +4,22 @@ import java.util.Optional;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.nightletter.domain.member.dto.MemberDetails;
-import com.nightletter.domain.member.entity.Member;
-import com.nightletter.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class JpaAuditorConfig implements AuditorAware<Integer> {
 
 	@Override
 	public Optional<Integer> getCurrentAuditor() {
+		log.info("Auditor Parsing");
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 		if (authentication == null || !authentication.isAuthenticated()) {

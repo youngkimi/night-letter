@@ -12,7 +12,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.entity.Provider;
 import com.nightletter.domain.member.repository.MemberRepository;

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +17,6 @@ import com.nightletter.domain.social.dto.response.NotificationResponse;
 import com.nightletter.domain.social.entity.Notification;
 import com.nightletter.domain.social.entity.NotificationType;
 import com.nightletter.domain.social.repository.NotificationRepository;
-import com.nightletter.global.common.CurrentMember;
 import com.nightletter.global.exception.CommonErrorCode;
 import com.nightletter.global.exception.ResourceNotFoundException;
 
