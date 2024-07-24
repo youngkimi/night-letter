@@ -1,10 +1,7 @@
 package com.nightletter.global.security.handler.jwt;
 
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.SignatureException;
-import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,7 +15,7 @@ import com.nightletter.domain.member.repository.MemberRepository;
 import com.nightletter.global.exception.CommonErrorCode;
 import com.nightletter.global.exception.ResourceNotFoundException;
 import com.nightletter.global.security.token.AccessToken;
-import com.nightletter.global.utils.times.DateTimeUtils;
+import static com.nightletter.global.utils.times.DateTimeUtils.*;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -50,8 +47,8 @@ public class JwtProvider {
 		return Jwts.builder()
 			.signWith(key, SignatureAlgorithm.HS256)
 			.setSubject(memberId)
-			.setIssuedAt(DateTimeUtils.tokenIssuedDate())
-			.setExpiration(DateTimeUtils.tokenExpireDate())
+			.setIssuedAt(tokenIssuedDate())
+			.setExpiration(tokenExpireDate())
 			.addClaims(roles)
 			.compact();
 	}
