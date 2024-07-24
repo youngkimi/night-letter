@@ -26,7 +26,7 @@ public class DateTimeUtils {
 	}
 
 	public static Instant tokenExpireTime() {
-		return LocalDateTime.now().plusSeconds(accessTokenExpirationTime).toInstant(ZoneOffset.of("+09:00"));
+		return LocalDateTime.now().toInstant(ZoneOffset.of("+09:00")).plusMillis(accessTokenExpirationTime);
 	}
 
 	public static LocalDate getToday() {

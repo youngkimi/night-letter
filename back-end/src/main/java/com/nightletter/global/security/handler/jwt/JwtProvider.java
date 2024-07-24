@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -79,9 +80,11 @@ public class JwtProvider {
 
 			System.out.println("Role : " + role);
 
+			GrantedAuthority authority = new SimpleGrantedAuthority(role);
+
 			return Optional.of(AccessToken.builder()
 				.memberId(Integer.parseInt(subject))
-				.role(new SimpleGrantedAuthority(role))
+				.role(authority)
 				.build());
 		} catch (Exception e) {
 			log.error("Invalid key error");
