@@ -8,9 +8,7 @@ import java.lang.annotation.Target;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-@Target({ElementType.PARAMETER, ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
+// getMember by expression
 @AuthenticationPrincipal(expression = "member")
-@Documented
 public @interface CurrentMember {
 }
