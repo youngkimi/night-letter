@@ -23,7 +23,6 @@ public class MemberServiceImpl implements MemberService {
 		return new MemberNicknameResponse(member.getNickname());
 	}
 
-	@Transactional
 	@Override
 	public MemberNicknameResponse updateMemberNickname(Member member, String nickname) {
 		member.updateNickname(nickname);

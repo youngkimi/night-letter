@@ -88,7 +88,6 @@ public class Member extends BaseTimeEntity implements OAuth2User {
 
 	@Override
 	public String getName() {
-		System.out.println("Called Get Name.");
 		return this.memberId.toString();
 	}
 
