@@ -2,19 +2,28 @@ package com.nightletter.domain.member.dto;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import com.nightletter.domain.member.entity.Member;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
-public class MemberDetails implements UserDetails {
+public class MemberDetails implements UserDetails, OAuth2User {
 
 	private final Member member;
+
+	@Override
+	public Map<String, Object> getAttributes() {
+		return null;
+	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -52,11 +61,12 @@ public class MemberDetails implements UserDetails {
 		return false;
 	}
 
-	public Member getMember() {
-		return member;
-	}
-
 	public MemberDetails of(Member member) {
 		return new MemberDetails(member);
+	}
+
+	@Override
+	public String getName() {
+		return null;
 	}
 }

@@ -12,6 +12,5 @@ public interface MemberRepository extends JpaRepository<Member, Integer>, Member
 	Member findMemberByOAuth2Id(String OAuth2Id);
 
 	Member findByMemberId(Integer currentMemberId);
-
 }
 

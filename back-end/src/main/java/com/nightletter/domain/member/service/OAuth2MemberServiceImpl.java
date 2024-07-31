@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import com.nightletter.domain.member.dto.MemberDetails;
 import com.nightletter.domain.member.entity.Member;
 import com.nightletter.domain.member.entity.Provider;
 import com.nightletter.domain.member.repository.MemberRepository;
@@ -52,7 +53,7 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 
 				member = memberRepository.findMemberByOAuth2Id(OAuth2Id);
 
-				if (member != null) { return member; }
+				if (member != null) { return new MemberDetails(member); }
 
 				Map<String, String> kakaoAccountInfo = oAuth2User.getAttribute("kakao_account");
 				// Map<String, String> kakaoProfileInfo = oAuth2User.getAttribute("properties");
@@ -93,6 +94,6 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 
 		log.info("Current member well processed.");
 
-		return member;
+		return new MemberDetails(member);
 	}
 }
