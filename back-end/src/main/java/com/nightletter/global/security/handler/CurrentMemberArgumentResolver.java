@@ -8,6 +8,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import com.nightletter.domain.member.dto.MemberDetails;
 import com.nightletter.domain.member.entity.Member;
 import com.nightletter.global.common.CurrentMember;
 
@@ -22,10 +23,16 @@ public class CurrentMemberArgumentResolver implements HandlerMethodArgumentResol
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 		NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null) {
+		if (authentication == null || !authentication.isAuthenticated()) {
 			return null;
 		}
-		return authentication.getPrincipal();
+
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof MemberDetails) {
+			return ((MemberDetails) principal).getMember();
+		}
+
+		return null;
 	}
 
 }

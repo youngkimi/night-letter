@@ -49,7 +49,6 @@ import com.nightletter.domain.tarot.dto.TarotResponse;
 import com.nightletter.domain.tarot.entity.FutureTarot;
 import com.nightletter.domain.tarot.entity.Tarot;
 import com.nightletter.domain.tarot.repository.TarotFutureRedisRepository;
-import com.nightletter.domain.tarot.repository.TarotPastRedisRepository;
 import com.nightletter.domain.tarot.service.TarotService;
 import com.nightletter.domain.tarot.service.TarotServiceImpl;
 import com.nightletter.global.common.CurrentMember;
