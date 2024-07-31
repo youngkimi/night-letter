@@ -27,7 +27,7 @@ public class MemberController {
 	}
 
 	@PatchMapping("/nickname")
-	public ResponseEntity<?> addDiary(@CurrentMember Member member, @RequestParam String nickname) {
+	public ResponseEntity<?> updateMemberNickname(@CurrentMember Member member, @RequestParam String nickname) {
 		return ResponseEntity.ok(memberService.updateMemberNickname(member, nickname));
 	}
 
