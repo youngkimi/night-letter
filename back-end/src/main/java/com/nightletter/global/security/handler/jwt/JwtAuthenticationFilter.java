@@ -68,12 +68,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	private boolean findMemberAndSetSecurityContext(AccessToken accessToken, HttpServletRequest request) {
-		return memberRepository.findById(accessToken.getMemberId())
-			.map(member -> setSecurityContext(member, accessToken, request))
-			.orElseGet(() -> {
-				log.warn("Member not found for ID: {}", accessToken.getMemberId());
-				return false;
-			});
+		Member member = memberRepository.findByMemberId(accessToken.getMemberId());
+
+		if (member == null) {
+			log.warn("Member not found for ID: {}", accessToken.getMemberId());
+			return false;
+		}
+
+		setSecurityContext(member, accessToken, request);
+		return true;
 	}
 
 	private boolean setSecurityContext(Member member, AccessToken accessToken ,HttpServletRequest request) {

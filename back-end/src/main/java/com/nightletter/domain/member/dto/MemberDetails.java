@@ -18,7 +18,7 @@ public class MemberDetails implements UserDetails {
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of(new SimpleGrantedAuthority(member.getRole().toString()));
+		return List.of(new SimpleGrantedAuthority(this.member.getRole().toString()));
 	}
 
 	@Override
@@ -29,7 +29,7 @@ public class MemberDetails implements UserDetails {
 	@Override
 	public String getUsername() {
 		System.out.println("Member Details Called");
-		return member.getMemberId().toString();
+		return this.member.getMemberId().toString();
 	}
 
 	@Override

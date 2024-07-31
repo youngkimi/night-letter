@@ -26,7 +26,7 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	public MemberNicknameResponse updateMemberNickname(Member member, String nickname) {
 		member.updateNickname(nickname);
-		memberRepository.saveAndFlush(member);
+		memberRepository.save(member);
 
 		return new MemberNicknameResponse(member.getNickname());
 	}
