@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import com.nightletter.domain.member.dto.MemberDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -54,9 +55,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		Optional.of(authentication)
 			.map(Authentication::getPrincipal)
-			.filter(Member.class::isInstance)
-			.map(Member.class::cast)
-			.map(member -> jwtProvider.create(member.getMemberId().toString()))
+			.filter(MemberDetails.class::isInstance)
+			.map(MemberDetails.class::cast)
+			.map(memberDetails -> jwtProvider.create(memberDetails.getMember().getMemberId().toString()))
 			.map(this::getAccessCookie)
 			.ifPresentOrElse(
 				cookie -> sendSuccessResponse(response, cookie),
