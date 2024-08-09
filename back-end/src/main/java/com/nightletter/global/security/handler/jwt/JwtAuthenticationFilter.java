@@ -62,8 +62,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		log.info("Token parsed well");
-
 		filterChain.doFilter(request, response);
 	}
 
@@ -86,7 +84,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 			securityContext.setAuthentication(authenticationToken);
 			SecurityContextHolder.setContext(securityContext);
-			log.info("Security Context Setting supposed to be good!");
 			return true;
 		} catch (Exception e) {
 			log.error("Error setting security context", e);

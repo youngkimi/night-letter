@@ -71,9 +71,6 @@ public class DiaryController {
 	@PostMapping("/self")
 	public ResponseEntity<?> findDiaries(@CurrentMember Member member, @RequestBody DiaryListRequest diaryListRequest) {
 
-		log.info("Member Id: " + member.getMemberId().toString());
-		log.info("Member Nickname: " + member.getNickname());
-
 		List<DiaryResponse> response = diaryService.findDiaries(diaryListRequest, member);
 
 		return ResponseEntity.ok(response);

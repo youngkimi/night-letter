@@ -19,7 +19,6 @@ public class JpaAuditorConfig implements AuditorAware<Integer> {
 
 	@Override
 	public Optional<Integer> getCurrentAuditor() {
-		log.info("Auditor Parsing");
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 		if (authentication == null || !authentication.isAuthenticated()) {

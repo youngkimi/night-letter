@@ -38,7 +38,6 @@ public class DateTimeUtils {
 	}
 
 	public static Date tokenExpireDate() {
-		System.out.println("Expire Date: " + accessTokenExpirationTime);
 		return Date.from(LocalDateTime.now().plus(accessTokenExpirationTime, ChronoUnit.MILLIS).toInstant(ZoneOffset.of("+09:00")));
 	}
 

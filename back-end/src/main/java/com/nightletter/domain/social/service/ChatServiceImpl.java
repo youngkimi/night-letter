@@ -29,7 +29,6 @@ public class ChatServiceImpl implements ChatService {
 
 	@Override
 	public ChatResponse sendMessage(Integer memberId, Integer roomId, String message) {
-		System.out.println("sendMessageTO: " + memberId);
 
 		Chatroom chatroom = chatroomRepository.findById(roomId)
 			.orElseThrow();

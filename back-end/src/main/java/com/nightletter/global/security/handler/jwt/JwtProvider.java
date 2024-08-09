@@ -69,11 +69,7 @@ public class JwtProvider {
 
 			subject = claims.getSubject();
 
-			System.out.println("Subject : " + subject);
-
 			role = claims.get("role").toString();
-
-			System.out.println("Role : " + role);
 
 			GrantedAuthority authority = new SimpleGrantedAuthority(role);
 
