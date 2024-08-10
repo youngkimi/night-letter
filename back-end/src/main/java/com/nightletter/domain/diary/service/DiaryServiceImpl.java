@@ -122,8 +122,6 @@ public class DiaryServiceImpl implements DiaryService {
 			.recommendedDiaryIdList(recDiariesId)
 			.build();
 
-		System.out.println("SEND_EVENT: event: " + event);
-
 		// 메세지 전송.
 		// 생성된 다이어리 아이디와, 임베딩 벡터 값을 전달.
 		kafkaTemplate.send("create-diary", event);
@@ -134,8 +132,6 @@ public class DiaryServiceImpl implements DiaryService {
 	@Transactional
 	@KafkaListener(topics = "create-diary", groupId = "recommend_diary")
 	public void sendRecommendedDiaries(DiaryCreateEvent event) {
-
-		System.out.println("RECEIVE_REC_EVENT: event: " + event);
 
 		if (event == null || event.getRecommendedDiaryIdList() == null) {
 			// 에러 처리 .
@@ -209,7 +205,6 @@ public class DiaryServiceImpl implements DiaryService {
 		if (recommendDiaries.isEmpty()) {
 			throw new ResourceNotFoundException(CommonErrorCode.RESOURCE_NOT_FOUND, "RECOMMEND DIARIES NOT FOUND");
 		}
-		log.info("============================= {} ", recommendDiaries.toString());
 		return recommendDiaries;
 	}
 

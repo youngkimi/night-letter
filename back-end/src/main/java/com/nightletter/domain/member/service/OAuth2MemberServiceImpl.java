@@ -34,8 +34,6 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 	@Override
 	public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-		System.out.println("OAuth2 Requested Information Arrived From Provider");
-
 		OAuth2User oAuth2User = super.loadUser(userRequest);
 
 		String oauthClientName = userRequest.getClientRegistration().getClientName();
@@ -68,9 +66,6 @@ public class OAuth2MemberServiceImpl extends DefaultOAuth2UserService {
 
 				profileImgUrl = profileBaseUrl + profileRandomNum + ".webp";
 				provider = KAKAO;
-
-				log.info("Member info provided by Kakao");
-				log.info("user email: {}", email);
 
 				break;
 			case "apple":

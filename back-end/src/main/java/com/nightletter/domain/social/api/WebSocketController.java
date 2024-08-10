@@ -20,7 +20,9 @@ import com.nightletter.domain.social.service.ChatService;
 import com.nightletter.domain.social.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RequiredArgsConstructor
 @Controller
 public class WebSocketController {
@@ -32,10 +34,6 @@ public class WebSocketController {
 	public void handleSubscribeEvent(SessionSubscribeEvent event) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 		String destination = headerAccessor.getDestination();
-
-		System.out.println("TEST1: " + event.getUser().toString());
-		System.out.println("TEST2: " + event.getSource().toString());
-		System.out.println("TEST3: " + event.getMessage());
 
 		// TODO null 처리 .
 		if (destination == null) {
@@ -51,9 +49,8 @@ public class WebSocketController {
 
 		if (matcher.find()) {
 			Integer roomId = Integer.parseInt(matcher.group(1)); // 첫 번째 캡처 그룹(숫자) 추출
-			System.out.println("Extracted number: " + roomId);
 		} else {
-			System.out.println("No number found in the string.");
+			log.info("No number found in the string.");
 		}
 
 	}
@@ -61,10 +58,6 @@ public class WebSocketController {
 	@EventListener
 	public void handleDisconnectEvent(SessionDisconnectEvent event) {
 		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-
-		System.out.println(headerAccessor.toString());
-
-		System.out.println("disconnected");
 	}
 
 }

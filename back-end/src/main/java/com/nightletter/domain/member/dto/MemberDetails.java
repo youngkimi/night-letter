@@ -37,7 +37,6 @@ public class MemberDetails implements UserDetails, OAuth2User {
 
 	@Override
 	public String getUsername() {
-		System.out.println("Member Details Called");
 		return this.member.getMemberId().toString();
 	}
 

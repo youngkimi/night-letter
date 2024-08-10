@@ -58,7 +58,6 @@ public class DiaryResponse {
 			if (diaryTarot.getType() == DiaryTarotType.FUTURE) {
 				future = tarot;
 			}
-			System.out.println(tarot);
 		}
 
 		return DiaryResponse.builder()
